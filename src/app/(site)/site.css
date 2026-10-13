@@ -890,3 +890,5 @@ footer {
     transition: none !important;
   }
 }
+
+.draft-watermark{position:fixed;inset:-10%;z-index:9999;pointer-events:none;display:grid;grid-template-columns:repeat(3,1fr);gap:60px;overflow:hidden;opacity:.18;transform:rotate(-25deg);color:#9b2525;font:bold clamp(48px,9vw,130px)/1 sans-serif;user-select:none}.draft-watermark span{align-self:center;text-align:center}

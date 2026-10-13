@@ -39,7 +39,7 @@ export default async function Layout({
   ];
   return (
     <html lang="en">
-      <body>
+      <body><div className="draft-watermark" aria-hidden="true">{Array.from({length: 24}, (_, i) => <span key={i}>DRAFT</span>)}</div><div style={{background: "#263c30", color: "white", padding: "12px 20px", textAlign: "center", fontSize: "14px"}}>Design preview · Resident signup and administration are not available yet.</div>
         <a className="skip" href="#main">
           Skip to content
         </a>

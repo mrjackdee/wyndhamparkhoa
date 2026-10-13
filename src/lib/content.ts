@@ -1,48 +1,7 @@
-import { cache } from "react";
-import { getPayload } from "payload";
-import config from "@payload-config";
-export const cms = cache(() => getPayload({ config }));
-export const settings = cache(async () => {
-  const p = await cms();
-  return p.findGlobal({
-    slug: "site-settings",
-    overrideAccess: false,
-    depth: 1,
-  });
-});
-export const pages = cache(async () => {
-  const p = await cms();
-  return (
-    await p.find({
-      collection: "pages",
-      overrideAccess: false,
-      depth: 0,
-      limit: 30,
-      sort: "title",
-    })
-  ).docs;
-});
-export const dues = cache(async () => {
-  const p = await cms();
-  return (
-    await p.find({
-      collection: "dues",
-      overrideAccess: false,
-      depth: 0,
-      limit: 50,
-      sort: "-year",
-    })
-  ).docs;
-});
-export const news = cache(async () => {
-  const p = await cms();
-  return (
-    await p.find({
-      collection: "news",
-      overrideAccess: false,
-      depth: 0,
-      limit: 100,
-      sort: "-createdAt",
-    })
-  ).docs;
-});
+import type { SiteSetting, Page, Due, News, Media } from "@/payload-types";
+import { CONTACTS, PURPOSE } from "./facts";
+export async function settings(): Promise<SiteSetting> { return { id: 1, intro: "Stay connected with Wyndham Park Homeowners Association. Find annual dues information, update your contact details, and reach your HOA representatives.", leadership: CONTACTS, heroPosition: "center" } as SiteSetting; }
+export async function pages(): Promise<Page[]> { return [{ id: 1, title: "HOA & Leadership", slug: "hoa-and-leadership", summary: "Your point of contact for association information and community communication.", body: "Wyndham Park Homeowners Association (WPHOA) shares annual dues information and maintains resident contact details and communication preferences.\n\nThe supplied 2026 notice states that annual dues help keep the front entrance clean, beautiful, and safe. Contact the association for governing documents, membership requirements, and questions about dues.\n\nThe representatives below are listed in the 2026 notice. Their roles are recorded with that source year and should be confirmed with the association when current information is needed." } as Page]; }
+export async function dues(): Promise<Due[]> { return [{ id: 1, year: 2026, amount: 160, purpose: PURPOSE, paymentEmail: "wyndhamparkhoa@yahoo.com", instructions: "Use your bank’s Zelle interface and verify the recipient before sending payment. For questions about the listed payment destination, contact the HOA.", contacts: CONTACTS } as Due]; }
+export async function news(): Promise<News[]> { return []; }
+export async function cms() { return { find: async (_args: unknown) => ({ docs: [] as Media[] }) }; }

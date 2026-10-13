@@ -1,0 +1,1 @@
+export default function Admin() { return <div className="wrap section"><p className="eyebrow">DESIGN PREVIEW</p><h1>HOA administration.</h1><p className="lead">Secure administrator access is not available in this layout preview.</p></div>; }

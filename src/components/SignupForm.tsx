@@ -20,6 +20,7 @@ export default function SignupForm() {
     }
   }
   useEffect(() => {
+    return;
     id.current = crypto.randomUUID();
     fetch("/api/form-token", { cache: "no-store" })
       .then((r) => r.json())
@@ -32,6 +33,7 @@ export default function SignupForm() {
   }, []);
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    return;
     setPending(true);
     setMessage("");
     setErrors({});
@@ -122,7 +124,7 @@ export default function SignupForm() {
     </div>
   );
   return (
-    <form className="signup-form" onSubmit={submit}>
+    <fieldset disabled style={{border: 0, padding: 0, margin: 0}}><p role="note">Layout preview only. Please do not enter personal information. Submissions are disabled.</p><form className="signup-form" onSubmit={submit}>
       <div ref={status} tabIndex={-1} role="alert">
         {message ? <p className="notice error">{message}</p> : null}
       </div>
@@ -204,6 +206,6 @@ export default function SignupForm() {
         {pending ? "Saving your information…" : "Submit for review"}{" "}
         <span aria-hidden="true">↗</span>
       </button>
-    </form>
+    </form></fieldset>
   );
 }
