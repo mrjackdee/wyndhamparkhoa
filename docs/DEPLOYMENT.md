@@ -4,12 +4,12 @@
 
 - GitHub: https://github.com/mrjackdee/wyndhamparkhoa
 - Vercel team: `mrjackdees-projects`, `team_2XlvENzoV6aQ9TLMHdfK4T40`
-- Created Vercel project: `wyndham-park-hoa`, `prj_pqZ8sdzSh2kGSOHA5Hr4tL8hvgSj`
-- No deployment or live domain has been verified. The project is not yet Git-connected.
+- Created Vercel project: `wyndhamparkhoa`, `prj_1s8VkxF3mwF5WW6DOOt9Foxeqgjb`
+- An initial protected deployment was started automatically by Git connection. No working live website has been verified. The project is linked to `mrjackdee/wyndhamparkhoa`, production branch `main`.
 
 ## Required owner decisions
 
-1. Confirm the Supabase organization. The connected account showed one organization, **DonOra**, and no existing projects. Its provisioning tool explicitly requires organization selection before obtaining the account-specific cost quote. No project or paid subscription was created.
+1. The owner approved **DonOra** for Supabase on 13 October 2026. The cost-quote operation returned UNAVAILABLE twice because the server does not expose get_cost. No cost was confirmed and no database project or paid subscription was created. Resolve provisioning support or use an owner-approved secure dashboard setup; do not invent a cost-confirmation ID.
 2. Review the resulting cost quote before any billed provisioning.
 3. Provide the first administrator's individual email through the invitation setup flow and connect an approved verified outbound email service. Do not paste credentials into chat.
 
@@ -38,7 +38,7 @@ Source: https://vercel.com/docs/plans/hobby
 
 ## Release gates
 
-- Connect the intended GitHub repository to the existing Vercel project. Do not create a duplicate or overwrite another project.
+- GitHub connection is complete for the exact owner-requested project name `wyndhamparkhoa`. Earlier empty project `wyndham-park-hoa` is unused and has no deployment or data; no delete operation is exposed by the connector. Use only project `prj_1s8VkxF3mwF5WW6DOOt9Foxeqgjb` going forward.
 - Deploy protected preview from the intended commit and environment.
 - Verify all public routes at 375, 768 and 1440 pixel widths, keyboard and focus behavior, image crop, navigation, downloads, 404, and error states.
 - Verify real sign-in, sign-out, recovery, editor restrictions, revocation, drafts, private preview, publication, restoration, private uploads and authorized exports.

@@ -18,7 +18,7 @@ Date: 13 October 2026. This record is about local source validation, not a verif
 - Real PostgreSQL migration, Supabase Data API denial, remote private S3 storage and backup restore.
 - Full HTTP form success/failure behavior, real storage outage handling, browser error preservation, concurrent administrator review and merge flows.
 - SMTP delivery, secure invitations, recovery, browser sign-in/sign-out, CSV browser download, PDF download and live content edits.
-- Git-to-Vercel connection, protected preview, production deployment and live URL.
+- Git-to-Vercel connection is verified for `wyndhamparkhoa`. A working protected preview, production deployment and live URL remain unverified.
 - Facebook content access, exact community location/background, governing documents and verified current events. The reference site does not establish Wyndham Park facts.
 
 ## Defects corrected during local work

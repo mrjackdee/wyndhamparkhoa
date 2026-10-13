@@ -6,7 +6,7 @@ Custom multipage HOA website built with Next.js, TypeScript, and Payload CMS. So
 
 **Implementation and local validation are in progress. This is not a live or fully verified production release.**
 
-Vercel project created: `wyndham-park-hoa` (`prj_pqZ8sdzSh2kGSOHA5Hr4tL8hvgSj`), team `mrjackdees-projects`. Database, private object storage, email recovery, first owner administrator, deployed browser QA, and production publication are pending. Do not publish with local test storage.
+Vercel project created: `wyndhamparkhoa` (`prj_1s8VkxF3mwF5WW6DOOt9Foxeqgjb`), team `mrjackdees-projects`. Database, private object storage, email recovery, first owner administrator, deployed browser QA, and production publication are pending. Do not publish with local test storage.
 
 See [owner guide](docs/OWNER_GUIDE.md), [verification record](docs/QA.md), and [deployment checklist](docs/DEPLOYMENT.md).
 
