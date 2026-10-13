@@ -6,18 +6,24 @@ import { HOA_EMAIL, FACEBOOK } from "@/lib/facts";
 import "./site.css";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  ),
+  metadataBase: new URL("https://wyndhamparkhoa-git-layout-preview-mrjackdees-projects.vercel.app"),
   title: {
-    default: "Wyndham Park Homeowners Association",
-    template: "%s | Wyndham Park HOA",
+    default: "Wyndham Park HOA | Preview",
+    template: "Wyndham Park HOA | Preview",
   },
-  description:
-    "Resident contact updates, annual HOA dues information, and association contacts for Wyndham Park.",
+  description: "Preview the Wyndham Park Homeowners Association website, including resident resources, 2026 dues information, and HOA contacts.",
   openGraph: {
-    siteName: "Wyndham Park Homeowners Association",
+    title: "Wyndham Park HOA | Preview",
+    description: "A draft preview of the Wyndham Park Homeowners Association website.",
+    siteName: "Wyndham Park HOA | Preview",
     type: "website",
+    images: [{ url: "/wyndham-park-entrance.jpeg", width: 1125, height: 1152, alt: "Wyndham Park neighborhood entrance" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Wyndham Park HOA | Preview",
+    description: "A draft preview of the Wyndham Park Homeowners Association website.",
+    images: ["/wyndham-park-entrance.jpeg"],
   },
   robots: {
     index: process.env.VERCEL_ENV === "production",
