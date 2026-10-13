@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     description: "A draft preview of the Wyndham Park Homeowners Association website.",
     siteName: "Wyndham Park HOA | Preview",
     type: "website",
-    images: [{ url: "/wyndham-park-entrance.jpeg", width: 1125, height: 1152, alt: "Wyndham Park neighborhood entrance" }],
+    images: [{ url: "/wyndham-park-entrance.jpeg", width: 1125, height: 1151, alt: "Wyndham Park neighborhood entrance" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -45,7 +45,7 @@ export default async function Layout({
   ];
   return (
     <html lang="en">
-      <body><div className="draft-watermark" aria-hidden="true">{Array.from({length: 24}, (_, i) => <span key={i}>DRAFT</span>)}</div><div style={{background: "#263c30", color: "white", padding: "12px 20px", textAlign: "center", fontSize: "14px"}}>Design preview · Resident signup and administration are not available yet.</div>
+      <body><div className="draft-watermark" aria-hidden="true">{Array.from({length: 24}, (_, i) => <span key={i}>DRAFT</span>)}</div><div className="preview-ribbon">Design preview · Resident signup and administration are not available yet.</div>
         <a className="skip" href="#main">
           Skip to content
         </a>
