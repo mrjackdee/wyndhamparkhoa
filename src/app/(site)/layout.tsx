@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Inter } from "next/font/google";
+const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
 import Nav from "@/components/Nav";
 import { pages, news } from "@/lib/content";
 import { HOA_EMAIL, FACEBOOK } from "@/lib/facts";
@@ -44,7 +46,7 @@ export default async function Layout({
     { href: "/resources", label: "Resources" },
   ];
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <body><div className="draft-watermark" aria-hidden="true">{Array.from({length: 24}, (_, i) => <span key={i}>DRAFT</span>)}</div><div className="preview-ribbon">Design preview · Resident signup and administration are not available yet.</div>
         <a className="skip" href="#main">
           Skip to content

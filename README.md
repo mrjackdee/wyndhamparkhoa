@@ -60,3 +60,8 @@ Do not expose the `wphoa` schema through Supabase's public Data API. The migrati
 ### Website legal pages and footer (October 13, 2026)
 
 The footer renders the current server year with `new Date().getFullYear()` on each dynamic request, includes the DonOra Global developer credit linking to https://www.DonOraGlobal.com, and links to `/privacy` and `/terms`. These dedicated routes take precedence over the catch-all route. Preview metadata and DRAFT markings remain in place. Privacy text distinguishes disabled preview functionality from planned connected services. Terms address website use, dated dues, external payments, developer responsibilities, content ownership, and legally limited warranty/liability provisions. They do not amend HOA governing documents or impose arbitration. Text is an owner-requested draft, not an attorney opinion or assurance of enforceability; Georgia counsel should review before final launch. Revise the policy date when practices change, not automatically with the copyright year.
+
+
+### Homepage and typography refinement
+
+The public site uses variable Inter through `next/font/google`, self-hosted in the deployed build with a Latin subset, swap loading, and an Arial fallback. Headings use weight 600 and balanced wrapping; body text remains 16px. The homepage Facebook section sits immediately below the entrance hero, wraps on smaller screens, and links to https://www.facebook.com/groups/3915883711993683 in a clearly announced new tab. It uses existing button focus/hover states and explains separate group approval. DRAFT markings remain. Local production build and changed TSX lint passed; visual browser verification remains outstanding.
