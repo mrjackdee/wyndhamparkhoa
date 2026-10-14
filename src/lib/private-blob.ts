@@ -30,5 +30,5 @@ export const privateBlobAdapter: Adapter = ({ collection, prefix = 'media' }) =>
   },
 });
 export const privateBlobStorage = () => cloudStoragePlugin({
-  collections: { media: { adapter: privateBlobAdapter, disableLocalStorage: true, prefix: 'media' } },
+  collections: { media: { adapter: privateBlobAdapter, disableLocalStorage: true, prefix: process.env.HOA_QA_SCHEMA ? 'qa/' + process.env.HOA_QA_SCHEMA : 'media' } },
 });

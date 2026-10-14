@@ -54,3 +54,5 @@ if (
   });
 console.log("Verified content seeded. No resident records created.");
 await p.destroy();
+
+process.exit(0);

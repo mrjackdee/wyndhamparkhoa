@@ -20,6 +20,8 @@ import {
   ReviewClaims,
 } from "./collections";
 import { admin, staff } from "./lib/access";
+const databaseSchema = process.env.HOA_QA_SCHEMA ?? "wphoa";
+if (databaseSchema !== "wphoa" && !/^wphoa_qa_[a-f0-9]{12}$/.test(databaseSchema)) throw new Error("Invalid isolated QA schema");
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const local = process.env.LOCAL_TEST_MODE === "true" && !process.env.VERCEL;
 if (!local && !process.env.DATABASE_URL)
@@ -52,7 +54,7 @@ export default buildConfig({
       })
     : postgresAdapter({
         pool: { connectionString: process.env.DATABASE_URL },
-        schemaName: "wphoa",
+        schemaName: databaseSchema,
         migrationDir: path.resolve(dirname, "migrations"),
         push: false,
       }),
