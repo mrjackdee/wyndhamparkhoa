@@ -69,6 +69,8 @@ const common: Field[] = [
   {
     name: "slug",
     type: "text",
+    label: "Page address (slug)",
+    admin: { description: "The final part of the page link. Example: sample-news-announcement. Use lowercase words separated by hyphens; avoid changing this after publication." },
     required: true,
     unique: true,
     validate: (v: unknown) =>

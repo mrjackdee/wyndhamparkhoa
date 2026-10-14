@@ -24,16 +24,16 @@ export default async function Home() {
         <div className="hero-copy">
           <p className="eyebrow">WYNDHAM PARK HOMEOWNERS ASSOCIATION</p>
           <h1>
-            A place to call home.
+            Welcome to
             <br />
-            <em>A community to care for.</em>
+            <em>Wyndham Park.</em>
           </h1>
           <p>{site.intro}</p>
           <div className="actions">
             <Link className="button" href="/resident-signup">
-              Stay connected <span>↗</span>
+              Resident signup <span aria-hidden="true">↗</span>
             </Link>
-            <Link className="text-link" href="/hoa-dues">
+            <Link className="button secondary" href="/hoa-dues">
               View HOA dues <span>→</span>
             </Link>
           </div>
@@ -45,7 +45,7 @@ export default async function Home() {
               alt={hero.alt ?? "Wyndham Park"}
               fill
               priority
-              sizes="(max-width: 760px) 100vw, 52vw"
+              sizes="(max-width: 900px) 100vw, 56vw"
               style={{
                 objectFit: "cover",
                 objectPosition: site.heroPosition ?? "center",
@@ -62,8 +62,8 @@ export default async function Home() {
         <div>
           <p className="eyebrow">CARING FOR OUR ENTRANCE</p>
           <h2>
-            Small details.
-            <br />A shared difference.
+            Care for the entrance.
+            <br />Support your community.
           </h2>
         </div>
         <div>

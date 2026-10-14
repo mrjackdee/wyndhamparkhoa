@@ -1,12 +1,13 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 export default function Nav({
   extra,
 }: {
   extra: { href: string; label: string }[];
 }) {
+  const toggle = useRef<HTMLButtonElement>(null);
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const items = [
@@ -18,6 +19,7 @@ export default function Nav({
   return (
     <>
       <button
+        ref={toggle}
         className="menu-toggle"
         aria-expanded={open}
         aria-controls="main-nav"
@@ -26,6 +28,7 @@ export default function Nav({
         {open ? "Close menu" : "Menu"}
       </button>
       <nav
+        onKeyDown={(event) => { if (event.key === "Escape") { setOpen(false); toggle.current?.focus(); } }}
         id="main-nav"
         aria-label="Main navigation"
         className={open ? "is-open" : ""}
@@ -34,10 +37,11 @@ export default function Nav({
           <Link
             key={i.href}
             href={i.href}
+            className={i.href === "/hoa-dues" ? "nav-dues" : undefined}
             aria-current={path === i.href ? "page" : undefined}
             onClick={() => setOpen(false)}
           >
-            {i.label}
+            {i.label === "HOA & Leadership" ? "Leadership" : i.label}
           </Link>
         ))}
         <Link

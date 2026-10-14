@@ -30,7 +30,6 @@ export default async function Page({
 }) {
   const { slug } = await params;
   if (slug === "contact") {
-    const site = await settings();
     return (
       <div className="wrap section">
         <p className="eyebrow">YOUR ASSOCIATION</p>
@@ -68,7 +67,7 @@ export default async function Page({
           to confirm current responsibilities.
         </p>
         <Contacts
-          people={site.leadership?.length ? site.leadership : CONTACTS}
+          people={CONTACTS}
         />
       </div>
     );

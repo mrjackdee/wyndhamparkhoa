@@ -10,11 +10,11 @@ Updated October 13, 2026 (America/New_York).
 |---|---|
 | Design preview | Deployed, public, DRAFT watermark, no resident collection |
 | Preview address | https://wyndhamparkhoa-git-layout-preview-mrjackdees-projects.vercel.app |
-| Production application | Not released; secure storage and email provisioning remain blocked |
+| Production application | Protected deployment ready; owner sign-in and full release QA pending |
 | Neon database | Connected; private `wphoa` schema initialized and verified by Vercel build on October 13 |
-| Administrator | Intended owner: `jackdee.sync@gmail.com`; account and invitation not yet provisioned |
+| Administrator | Owner account created for `jackdee.sync@gmail.com`; password-setup email accepted by Brevo; owner screenshot confirms CMS access |
 | Private uploads | Production private Blob store connected; live write/read, anonymous-access denial and test-file deletion verified |
-| Email | SMTP adapter implemented; no verified delivery service configured |
+| Email | Brevo configured; SMTP authentication verified; setup email accepted, owner reached the CMS through the setup flow |
 | Visual browser QA | Not executed; a supported browser-testing surface was unavailable |
 
 The working preview remains available while production is completed. It includes an explicitly disabled resident form and an unavailable-admin notice. It has no resident submission or authentication API routes. The privacy page describes intended production handling and must be reconciled with final providers before release.
@@ -26,7 +26,7 @@ The working preview remains available while production is completed. It includes
 - Project ID: `prj_1s8VkxF3mwF5WW6DOOt9Foxeqgjb`
 - Team: `mrjackdees-projects`, `team_2XlvENzoV6aQ9TLMHdfK4T40`
 - Dashboard: https://vercel.com/mrjackdees-projects/wyndhamparkhoa
-- `main`: initial full-stack application, not production-ready.
+- `main`: full-stack application, protected deployment; final browser and end-to-end release checks remain outstanding.
 - `layout-preview`: isolated visual review application; automatic Vercel preview deployments.
 - `production-setup`: database initialization and ongoing production integration. Merge only after release gates pass.
 
@@ -132,7 +132,7 @@ Payload collections: `users`, `pages`, `news`, `dues`, `media`, `residents`, `su
 
 Server access functions re-read the user's active status and role from the database to enforce revocation. Public initial-admin registration is blocked. Never distribute shared/default credentials. The first owner account must be bootstrapped through secure configuration and recovery/invitation delivery.
 
-CMS supports versions and restoration, draft/published states, archive flags, event dates/location/cancellation, media categories and structured content. Public copy is rendered as text rather than arbitrary HTML. Some system text/layout and the preview roster are code-managed. Migrating the latest full roster to editable structured production fields is a remaining integration task; do not claim all visible copy is currently CMS-editable.
+CMS supports versions and restoration, draft/published states, archive flags, event dates/location/cancellation, media categories and structured content. Public copy is rendered as text rather than arbitrary HTML. Some system text/layout and the preview roster are code-managed. The full production roster is now stored in Site settings with editable groups, names, roles, optional phones, and source years. System copy and legal text remain code-managed.
 
 ## Resident data flow
 
@@ -226,3 +226,25 @@ Before production release:
 8. Update the privacy notice, remove test data, verify production URL, and remove DRAFT only with owner direction.
 
 See `docs/OWNER_GUIDE.md`, `docs/QA.md` and `docs/DEPLOYMENT.md` for supporting material. Older Supabase provisioning notes in those documents are historical; Neon is the selected database and the status above supersedes them until those documents are reconciled.
+
+
+### Website legal pages and footer (October 13, 2026)
+
+The footer renders the current server year with `new Date().getFullYear()` on each dynamic request, includes the DonOra Global developer credit linking to https://www.DonOraGlobal.com, and links to `/privacy` and `/terms`. These dedicated routes take precedence over the catch-all route. Preview metadata and DRAFT markings remain in place. Privacy text distinguishes disabled preview functionality from planned connected services. Terms address website use, dated dues, external payments, developer responsibilities, content ownership, and legally limited warranty/liability provisions. They do not amend HOA governing documents or impose arbitration. Text is an owner-requested draft, not an attorney opinion or assurance of enforceability; Georgia counsel should review before final launch. Revise the policy date when practices change, not automatically with the copyright year.
+
+### Administrator and email setup status
+
+The owner account for jackdee.sync@gmail.com was created through `scripts/setup-owner.ts`, with a cryptographically random unshared password. Payload's password-reset flow issued the private setup email, and the Brevo SMTP transport accepted it. Inbox delivery and owner sign-in still require verification. The script refuses preview execution, does not reset an existing owner, and never logs tokens or credentials. Do not use the script as a normal build command after initial setup.
+
+Production SMTP variables are configured. SMTP authentication passed from Vercel with TLS. Brevo SMTP IP blocking was disabled by the owner because Vercel uses dynamic outbound addresses. API blocking was not changed. Keep the SMTP key secret, monitor sending activity, and rotate it if exposed. Gmail sender verification is complete, but Brevo can rewrite the outgoing sender because Gmail cannot be domain-authenticated by this account. An authenticated organization-controlled domain remains the preferred long-term setup. Brevo's free plan currently allows 300 sends per day and keys may deactivate after 90 days without successful use. No paid service was purchased.
+
+### Editable leadership roster
+
+Production Site settings now groups leadership rows into `Board Members` and `Standing Committees`; each row contains role, name (including Vacant), optional phone, and source year. The leadership page reads these fields. The dated 2026 payment-contact representatives remain separately recorded on the dues and contact pages. The idempotent database setup adds the grouping field to current and versioned settings tables and makes telephone numbers optional. `scripts/seed-roster.ts` loads the owner-supplied roster once and preserves an already updated roster.
+
+
+### Cloud verification checkpoint
+
+Seven unit tests and all 17 integration checks passed after the roster change. The same 17 integration checks then passed using a disposable Neon schema and private Vercel Blob uploads in a protected Vercel build. `scripts/verify-isolated.mjs` generates a strictly validated `wphoa_qa_` schema, disables SMTP in child test processes, uses an isolated Blob prefix, and removes both the schema and test uploads afterward. It never runs integration cleanup against `wphoa`. This caught and corrected the adapter database column `_objectkey`. TypeScript, ESLint, and the protected production build passed. These are application/database integration checks, not browser end-to-end certification.
+
+Owner screenshot confirms access to the announcement editor. Still unverified: browser responsiveness and keyboard operation, complete HTTP signup and administrative workflows (including export and sign-out), real notification delivery to the HOA, and backup restoration. Do not describe the site as complete or remove release protection until these checks are resolved. The owner-created sample announcement is not an automated fixture; do not delete it without reviewing its status with the owner.

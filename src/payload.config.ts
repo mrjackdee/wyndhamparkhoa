@@ -1,6 +1,7 @@
 import { buildConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { sqliteAdapter } from "@payloadcms/db-sqlite";
+import { privateBlobStorage } from "./lib/private-blob";
 import { s3Storage } from "@payloadcms/storage-s3";
 import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 import sharp from "sharp";
@@ -19,6 +20,8 @@ import {
   ReviewClaims,
 } from "./collections";
 import { admin, staff } from "./lib/access";
+const databaseSchema = process.env.HOA_QA_SCHEMA ?? "wphoa";
+if (databaseSchema !== "wphoa" && !/^wphoa_qa_[a-f0-9]{12}$/.test(databaseSchema)) throw new Error("Invalid isolated QA schema");
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const local = process.env.LOCAL_TEST_MODE === "true" && !process.env.VERCEL;
 if (!local && !process.env.DATABASE_URL)
@@ -27,7 +30,7 @@ if (!local && !process.env.DATABASE_URL)
   );
 if (
   process.env.VERCEL &&
-  (!process.env.S3_BUCKET || !process.env.PAYLOAD_SECRET)
+  ((!process.env.S3_BUCKET && !process.env.BLOB_READ_WRITE_TOKEN && !process.env.BLOB_STORE_ID) || !process.env.PAYLOAD_SECRET)
 )
   throw new Error(
     "Private durable upload storage and a signing secret are required.",
@@ -51,7 +54,7 @@ export default buildConfig({
       })
     : postgresAdapter({
         pool: { connectionString: process.env.DATABASE_URL },
-        schemaName: "wphoa",
+        schemaName: databaseSchema,
         migrationDir: path.resolve(dirname, "migrations"),
         push: false,
       }),
@@ -104,7 +107,8 @@ export default buildConfig({
           fields: [
             { name: "name", type: "text", required: true },
             { name: "role", type: "text", required: true },
-            { name: "phone", type: "text", required: true },
+            { name: "phone", type: "text" },
+            { name: "group", type: "text", required: true, defaultValue: "Board Members", validate: (value: unknown) => value === "Board Members" || value === "Standing Committees" || "Choose Board Members or Standing Committees", admin: { description: "Board Members or Standing Committees" } },
             { name: "sourceYear", type: "number", required: true },
           ],
         },
@@ -120,6 +124,7 @@ export default buildConfig({
           host: process.env.SMTP_HOST,
           port: Number(process.env.SMTP_PORT ?? 587),
           secure: process.env.SMTP_PORT === "465",
+          requireTLS: true,
           auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASSWORD,
@@ -134,7 +139,7 @@ export default buildConfig({
           throw new Error("Verified email service is not configured.");
         },
       }),
-  plugins: process.env.S3_BUCKET
+  plugins: (process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID) ? [privateBlobStorage()] : process.env.S3_BUCKET
     ? [
         s3Storage({
           collections: { media: true },

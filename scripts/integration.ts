@@ -3,7 +3,7 @@ import config from "../src/payload.config";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { notifySubmission, takeRateSlot } from "../src/lib/submission";
-if (process.env.LOCAL_TEST_MODE !== "true" || process.env.VERCEL)
+if (!((process.env.LOCAL_TEST_MODE === "true" && !process.env.VERCEL) || /^wphoa_qa_[a-f0-9]{12}$/.test(process.env.HOA_QA_SCHEMA ?? "")))
   throw new Error("Synthetic local tests only");
 const p = await getPayload({ config });
 const cleanup: {
@@ -392,3 +392,5 @@ try {
   });
   await p.destroy();
 }
+
+process.exit(0);

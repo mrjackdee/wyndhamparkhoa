@@ -6,18 +6,24 @@ import { HOA_EMAIL, FACEBOOK } from "@/lib/facts";
 import "./site.css";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  ),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: {
-    default: "Wyndham Park Homeowners Association",
-    template: "%s | Wyndham Park HOA",
+    default: "Wyndham Park HOA | Preview",
+    template: "Wyndham Park HOA | Preview",
   },
-  description:
-    "Resident contact updates, annual HOA dues information, and association contacts for Wyndham Park.",
+  description: "Preview the Wyndham Park Homeowners Association website, including resident resources, 2026 dues information, and HOA contacts.",
   openGraph: {
-    siteName: "Wyndham Park Homeowners Association",
+    title: "Wyndham Park HOA | Preview",
+    description: "A draft preview of the Wyndham Park Homeowners Association website.",
+    siteName: "Wyndham Park HOA | Preview",
     type: "website",
+    images: [{ url: "/wyndham-park-entrance.jpeg", width: 1125, height: 1151, alt: "Wyndham Park neighborhood entrance" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Wyndham Park HOA | Preview",
+    description: "A draft preview of the Wyndham Park Homeowners Association website.",
+    images: ["/wyndham-park-entrance.jpeg"],
   },
   robots: {
     index: process.env.VERCEL_ENV === "production",
@@ -39,7 +45,7 @@ export default async function Layout({
   ];
   return (
     <html lang="en">
-      <body>
+      <body><div className="draft-watermark" aria-hidden="true">{Array.from({length: 24}, (_, i) => <span key={i}>DRAFT</span>)}</div><div className="preview-ribbon">DRAFT · Wyndham Park Homeowners Association</div>
         <a className="skip" href="#main">
           Skip to content
         </a>
@@ -75,9 +81,11 @@ export default async function Layout({
             </div>
           </div>
           <div className="footer-bottom">
-            <span>Wyndham Park Homeowners Association</span>
+            <span>© {new Date().getFullYear()} Wyndham Park Homeowners Association. All rights reserved.</span>
             <div>
-              <Link href="/privacy">Privacy</Link>
+              <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/terms">Terms of Service</Link>
+              <a href="https://www.DonOraGlobal.com">Site Developed by DonOra Global</a>
               <Link href="/admin">HOA administration</Link>
             </div>
           </div>
