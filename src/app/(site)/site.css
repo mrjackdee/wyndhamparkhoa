@@ -18,7 +18,7 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Arial, sans-serif;
   font-size: 16px;
   line-height: 1.65;
 }
@@ -63,7 +63,7 @@ p {
 h1,
 h2,
 h3 {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-inter), Arial, sans-serif;
   font-weight: 400;
   line-height: 1.08;
   letter-spacing: -0.035em;
@@ -146,7 +146,7 @@ img {
   align-items: center;
   gap: 16px;
   text-decoration: none;
-  font-family: Georgia, serif;
+  font-family: var(--font-inter), Arial, sans-serif;
   font-size: 21px;
   letter-spacing: 0.045em;
   white-space: nowrap;
@@ -304,7 +304,7 @@ nav a[aria-current="page"] {
   letter-spacing: 0.08em;
 }
 .dues-stamp strong {
-  font-family: Georgia, serif;
+  font-family: var(--font-inter), Arial, sans-serif;
   font-weight: 400;
   font-size: 62px;
   line-height: 1;
@@ -358,8 +358,7 @@ nav a[aria-current="page"] {
 }
 .dues-heading > span {
   font:
-    72px Georgia,
-    serif;
+    72px var(--font-inter), Arial, sans-serif;
 }
 .dues-detail > .lead {
   margin: 28px 0 50px;
@@ -374,7 +373,7 @@ nav a[aria-current="page"] {
   font-size: 30px;
 }
 .step-number {
-  font-family: Georgia, serif;
+  font-family: var(--font-inter), Arial, sans-serif;
   font-size: 20px;
   color: var(--brick);
   display: block;
@@ -457,7 +456,7 @@ nav a[aria-current="page"] {
   font-size: 14px;
 }
 .resource-links span {
-  font-family: Georgia, serif;
+  font-family: var(--font-inter), Arial, sans-serif;
   color: var(--brick);
 }
 .faq {
@@ -908,3 +907,13 @@ h1{font-size:clamp(38px,4.4vw,60px);line-height:1.12;letter-spacing:-.035em;marg
 .legal-page p { line-height: 1.75; overflow-wrap: anywhere; }
 .footer-bottom > div { flex-wrap: wrap; }
 .footer-bottom > span { max-width: 32rem; }
+
+/* Inter is self-hosted by Next.js with a Latin subset and swap loading. */
+.wordmark small, textarea { font-family: var(--font-inter), Arial, sans-serif; }
+h1, h2, h3 { font-weight: 600; letter-spacing: -.035em; text-wrap: balance; }
+h1 em { font-weight: 600; }
+.wordmark { font-weight: 600; letter-spacing: .025em; }
+.wordmark small { font-weight: 500; }
+.hero h1 { font-size: clamp(36px, 4.2vw, 60px); line-height: 1.14; }
+.dues-stamp strong, .dues-heading > span { font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+@media(max-width:760px) { .hero h1 { font-size: clamp(32px, 8.5vw, 44px); } .wordmark { font-size: 14px; } }
