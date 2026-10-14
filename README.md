@@ -55,3 +55,8 @@ Tests use only synthetic data. The disabled email adapter throws rather than pre
 Use an approved PostgreSQL service and private S3-compatible bucket. Configure secrets in Vercel, never in chat or source control. Apply the generated PostgreSQL migration, seed verified content, securely create the first owner administrator, then verify a protected preview. Keep production and preview resident data separate.
 
 Do not expose the `wphoa` schema through Supabase's public Data API. The migration revokes public access and enables RLS. Payload uses a server-only database connection, with its own authorization rules. No public Supabase keys are required.
+
+
+### Website legal pages and footer (October 13, 2026)
+
+The footer renders the current server year with `new Date().getFullYear()` on each dynamic request, includes the DonOra Global developer credit linking to https://www.DonOraGlobal.com, and links to `/privacy` and `/terms`. These dedicated routes take precedence over the catch-all route. Preview metadata and DRAFT markings remain in place. Privacy text distinguishes disabled preview functionality from planned connected services. Terms address website use, dated dues, external payments, developer responsibilities, content ownership, and legally limited warranty/liability provisions. They do not amend HOA governing documents or impose arbitration. Text is an owner-requested draft, not an attorney opinion or assurance of enforceability; Georgia counsel should review before final launch. Revise the policy date when practices change, not automatically with the copyright year.
