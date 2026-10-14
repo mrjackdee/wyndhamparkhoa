@@ -13,7 +13,7 @@ Updated October 13, 2026 (America/New_York).
 | Production application | Not released; secure storage and email provisioning remain blocked |
 | Neon database | Connected; private `wphoa` schema initialized and verified by Vercel build on October 13 |
 | Administrator | Intended owner: `jackdee.sync@gmail.com`; account and invitation not yet provisioned |
-| Private uploads | Private Blob adapter implemented; live storage not provisioned or tested |
+| Private uploads | Production private Blob store connected; live write/read, anonymous-access denial and test-file deletion verified |
 | Email | SMTP adapter implemented; no verified delivery service configured |
 | Visual browser QA | Not executed; a supported browser-testing surface was unavailable |
 
@@ -163,7 +163,7 @@ The schema revokes public schema access and enables row-level security. Payload'
 
 The stock Payload Vercel Blob adapter was inspected and supports only public storage in the installed version, so it was not retained. S3 remains an alternative. Do not enable `disablePayloadAccessControl` or change the bucket/store to public.
 
-Actual provisioning is blocked: the Vercel connector returned HTTP 403 for Blob creation. No private store has been created. No authenticated Vercel CLI fallback is available locally. A store must be connected before live upload/access tests can pass.
+The Vercel connector returned HTTP 403 for Blob creation, so the owner created `wyndhamparkhoa-private` and connected Production only. OIDC via `BLOB_STORE_ID` is used without a long-lived read/write token. A live synthetic object passed write/read and anonymous-access denial checks and was deleted. Full CMS upload UI tests remain pending.
 
 ## Environment variables
 
@@ -216,7 +216,7 @@ Neon Free was selected by the owner. Vercel Blob has included allowances but sto
 
 Before production release:
 
-1. Provision private storage and verify permission boundaries with real uploads.
+1. Complete CMS-level upload/access checks; underlying private storage verification has passed.
 2. Configure verified email and bootstrap the owner via a secure invitation/recovery flow.
 3. Seed verified public content and finish editable roster integration.
 4. Bring the approved preview design into the full application without copying disabled APIs or static preview data.
