@@ -141,7 +141,7 @@ export default async function Home() {
       {updates.length ? (
         <section className="wrap section">
           <p className="eyebrow">FROM THE ASSOCIATION</p>
-          <h2>Community notes.</h2>
+          <h2>Community Events.</h2>
           <div className="news-list">
             {updates.slice(0, 3).map((n) => (
               <Link key={n.id} href={"/news/" + n.slug}>
