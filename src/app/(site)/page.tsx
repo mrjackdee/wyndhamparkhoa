@@ -58,6 +58,22 @@ export default async function Home() {
           <span>Information. Connection. Community.</span>
         </div>
       </section>
+      <section aria-labelledby="facebook-heading" style={{ background: "#e6eadf", borderTop: "1px solid #d4daca", borderBottom: "1px solid #d4daca" }}>
+        <div className="wrap" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "24px 40px", paddingTop: 32, paddingBottom: 32 }}>
+          <div style={{ flex: "1 1 260px" }}>
+            <p className="eyebrow" style={{ marginBottom: 8 }}>OUR COMMUNITY ON FACEBOOK</p>
+            <h2 id="facebook-heading" style={{ fontSize: "clamp(26px, 3vw, 34px)", margin: "0 0 10px" }}>Stay connected with Wyndham Park.</h2>
+            <p style={{ margin: 0, maxWidth: "52ch", color: "var(--muted)" }}>Visit our Facebook group to connect with neighbors and follow the community conversation.</p>
+          </div>
+          <div style={{ flex: "0 1 280px" }}>
+            <a className="button" href="https://www.facebook.com/groups/3915883711993683" target="_blank" rel="noopener noreferrer" aria-label="Join us on Facebook (opens in a new tab)">
+              <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.23.2 2.23.2v2.46h-1.26c-1.24 0-1.62.77-1.62 1.56V12h2.77l-.44 2.89h-2.33v6.99A10 10 0 0 0 22 12Z" /></svg>
+              Join us on Facebook <span aria-hidden="true">↗</span>
+            </a>
+            <p style={{ fontSize: 12, lineHeight: 1.5, margin: "12px 0 0", color: "var(--muted)" }}>Opens Facebook in a new tab. Group membership requires a separate request and approval.</p>
+          </div>
+        </div>
+      </section>
       <section className="dues-feature wrap">
         <div>
           <p className="eyebrow">CARING FOR OUR ENTRANCE</p>
