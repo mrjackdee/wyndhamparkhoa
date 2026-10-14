@@ -47,7 +47,7 @@ export default async function Layout({
   ];
   return (
     <html lang="en" className={inter.variable}>
-      <body><div className="draft-watermark" aria-hidden="true">{Array.from({length: 24}, (_, i) => <span key={i}>DRAFT</span>)}</div><div className="preview-ribbon">Design preview · Resident signup and administration are not available yet.</div>
+      <body><div className="preview-ribbon">Design preview · Resident signup and administration are not available yet.</div>
         <a className="skip" href="#main">
           Skip to content
         </a>
