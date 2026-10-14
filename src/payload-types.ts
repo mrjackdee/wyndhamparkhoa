@@ -13,53 +13,53 @@
  * via the `definition` "supportedTimezones".
  */
 export type SupportedTimezones =
-  | "Pacific/Midway"
-  | "Pacific/Niue"
-  | "Pacific/Honolulu"
-  | "Pacific/Rarotonga"
-  | "America/Anchorage"
-  | "Pacific/Gambier"
-  | "America/Los_Angeles"
-  | "America/Tijuana"
-  | "America/Denver"
-  | "America/Phoenix"
-  | "America/Chicago"
-  | "America/Guatemala"
-  | "America/New_York"
-  | "America/Bogota"
-  | "America/Caracas"
-  | "America/Santiago"
-  | "America/Buenos_Aires"
-  | "America/Sao_Paulo"
-  | "Atlantic/South_Georgia"
-  | "Atlantic/Azores"
-  | "Atlantic/Cape_Verde"
-  | "Europe/London"
-  | "Europe/Berlin"
-  | "Africa/Lagos"
-  | "Europe/Athens"
-  | "Africa/Cairo"
-  | "Europe/Moscow"
-  | "Asia/Riyadh"
-  | "Asia/Dubai"
-  | "Asia/Baku"
-  | "Asia/Karachi"
-  | "Asia/Tashkent"
-  | "Asia/Calcutta"
-  | "Asia/Dhaka"
-  | "Asia/Almaty"
-  | "Asia/Jakarta"
-  | "Asia/Bangkok"
-  | "Asia/Shanghai"
-  | "Asia/Singapore"
-  | "Asia/Tokyo"
-  | "Asia/Seoul"
-  | "Australia/Brisbane"
-  | "Australia/Sydney"
-  | "Pacific/Guam"
-  | "Pacific/Noumea"
-  | "Pacific/Auckland"
-  | "Pacific/Fiji";
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
 
 export interface Config {
   auth: {
@@ -74,13 +74,13 @@ export interface Config {
     media: Media;
     residents: Resident;
     submissions: Submission;
-    "rate-limits": RateLimit;
+    'rate-limits': RateLimit;
     audit: Audit;
-    "review-claims": ReviewClaim;
-    "payload-kv": PayloadKv;
-    "payload-locked-documents": PayloadLockedDocument;
-    "payload-preferences": PayloadPreference;
-    "payload-migrations": PayloadMigration;
+    'review-claims': ReviewClaim;
+    'payload-kv': PayloadKv;
+    'payload-locked-documents': PayloadLockedDocument;
+    'payload-preferences': PayloadPreference;
+    'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
   collectionsSelect: {
@@ -91,26 +91,23 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     residents: ResidentsSelect<false> | ResidentsSelect<true>;
     submissions: SubmissionsSelect<false> | SubmissionsSelect<true>;
-    "rate-limits": RateLimitsSelect<false> | RateLimitsSelect<true>;
+    'rate-limits': RateLimitsSelect<false> | RateLimitsSelect<true>;
     audit: AuditSelect<false> | AuditSelect<true>;
-    "review-claims": ReviewClaimsSelect<false> | ReviewClaimsSelect<true>;
-    "payload-kv": PayloadKvSelect<false> | PayloadKvSelect<true>;
-    "payload-locked-documents":
-      PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
-    "payload-preferences":
-      PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
-    "payload-migrations":
-      PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'review-claims': ReviewClaimsSelect<false> | ReviewClaimsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
     defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {
-    "site-settings": SiteSetting;
+    'site-settings': SiteSetting;
   };
   globalsSelect: {
-    "site-settings": SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -146,7 +143,7 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
-  role: "administrator" | "editor";
+  role: 'administrator' | 'editor';
   active?: boolean | null;
   name?: string | null;
   updatedAt: string;
@@ -167,7 +164,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
-  collection: "users";
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -192,7 +189,7 @@ export interface Page {
   archived?: boolean | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ("draft" | "published") | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -215,7 +212,7 @@ export interface News {
    * Archived content is removed from public pages. Previous versions remain available.
    */
   archived?: boolean | null;
-  kind: "announcement" | "event";
+  kind: 'announcement' | 'event';
   eventDate?: string | null;
   endDate?: string | null;
   timezone?: string | null;
@@ -223,7 +220,7 @@ export interface News {
   cancelled?: boolean | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ("draft" | "published") | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -253,7 +250,7 @@ export interface Due {
   archived?: boolean | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ("draft" | "published") | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Uploads are private until explicitly marked public. Publish only approved public documents and photos.
@@ -265,8 +262,8 @@ export interface Media {
   id: number;
   title: string;
   alt?: string | null;
-  visibility: "private" | "public";
-  category: "photo" | "document";
+  visibility: 'private' | 'public';
+  category: 'photo' | 'document';
   /**
    * Record the source and its year. Never publish unverified neighborhood claims.
    */
@@ -294,14 +291,14 @@ export interface Resident {
   address: string;
   mobile?: string | null;
   email: string;
-  textGroup: "yes" | "no";
-  facebookGroup: "yes" | "no";
-  status: "active" | "archived";
+  textGroup: 'yes' | 'no';
+  facebookGroup: 'yes' | 'no';
+  status: 'active' | 'archived';
   notes?: string | null;
   preferenceHistory?:
     | {
-        textGroup: "yes" | "no";
-        facebookGroup: "yes" | "no";
+        textGroup: 'yes' | 'no';
+        facebookGroup: 'yes' | 'no';
         changedAt: string;
         id?: string | null;
       }[]
@@ -320,15 +317,15 @@ export interface Submission {
   address: string;
   mobile?: string | null;
   email: string;
-  textGroup: "yes" | "no";
-  facebookGroup: "yes" | "no";
-  requestType: "new" | "update";
-  status?: ("pending" | "reviewed" | "archived") | null;
+  textGroup: 'yes' | 'no';
+  facebookGroup: 'yes' | 'no';
+  requestType: 'new' | 'update';
+  status?: ('pending' | 'reviewed' | 'archived') | null;
   notes?: string | null;
   resident?: (number | null) | Resident;
   idempotencyKey: string;
   privacyAcceptedAt: string;
-  notification?: ("pending" | "sent" | "failed") | null;
+  notification?: ('pending' | 'sent' | 'failed') | null;
   notificationAttempts?: number | null;
   notificationLastAttempt?: string | null;
   updatedAt: string;
@@ -395,48 +392,48 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: "users";
+        relationTo: 'users';
         value: number | User;
       } | null)
     | ({
-        relationTo: "pages";
+        relationTo: 'pages';
         value: number | Page;
       } | null)
     | ({
-        relationTo: "news";
+        relationTo: 'news';
         value: number | News;
       } | null)
     | ({
-        relationTo: "dues";
+        relationTo: 'dues';
         value: number | Due;
       } | null)
     | ({
-        relationTo: "media";
+        relationTo: 'media';
         value: number | Media;
       } | null)
     | ({
-        relationTo: "residents";
+        relationTo: 'residents';
         value: number | Resident;
       } | null)
     | ({
-        relationTo: "submissions";
+        relationTo: 'submissions';
         value: number | Submission;
       } | null)
     | ({
-        relationTo: "rate-limits";
+        relationTo: 'rate-limits';
         value: number | RateLimit;
       } | null)
     | ({
-        relationTo: "audit";
+        relationTo: 'audit';
         value: number | Audit;
       } | null)
     | ({
-        relationTo: "review-claims";
+        relationTo: 'review-claims';
         value: number | ReviewClaim;
       } | null);
   globalSlug?: string | null;
   user: {
-    relationTo: "users";
+    relationTo: 'users';
     value: number | User;
   };
   updatedAt: string;
@@ -449,7 +446,7 @@ export interface PayloadLockedDocument {
 export interface PayloadPreference {
   id: number;
   user: {
-    relationTo: "users";
+    relationTo: 'users';
     value: number | User;
   };
   key?: string | null;
@@ -712,13 +709,17 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface SiteSetting {
   id: number;
   hero?: (number | null) | Media;
-  heroPosition?: ("center" | "top" | "bottom") | null;
+  heroPosition?: ('center' | 'top' | 'bottom') | null;
   intro: string;
   leadership?:
     | {
         name: string;
         role: string;
-        phone: string;
+        phone?: string | null;
+        /**
+         * Board Members or Standing Committees
+         */
+        group: string;
         sourceYear: number;
         id?: string | null;
       }[]
@@ -740,6 +741,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         name?: T;
         role?: T;
         phone?: T;
+        group?: T;
         sourceYear?: T;
         id?: T;
       };
@@ -755,7 +757,7 @@ export interface CollectionsWidget {
   data?: {
     [k: string]: unknown;
   };
-  width: "full";
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -765,6 +767,7 @@ export interface Auth {
   [k: string]: unknown;
 }
 
-declare module "payload" {
+
+declare module 'payload' {
   export interface GeneratedTypes extends Config {}
 }

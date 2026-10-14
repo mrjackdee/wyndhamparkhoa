@@ -105,7 +105,8 @@ export default buildConfig({
           fields: [
             { name: "name", type: "text", required: true },
             { name: "role", type: "text", required: true },
-            { name: "phone", type: "text", required: true },
+            { name: "phone", type: "text" },
+            { name: "group", type: "text", required: true, defaultValue: "Board Members", validate: (value: unknown) => value === "Board Members" || value === "Standing Committees" || "Choose Board Members or Standing Committees", admin: { description: "Board Members or Standing Committees" } },
             { name: "sourceYear", type: "number", required: true },
           ],
         },
@@ -121,6 +122,7 @@ export default buildConfig({
           host: process.env.SMTP_HOST,
           port: Number(process.env.SMTP_PORT ?? 587),
           secure: process.env.SMTP_PORT === "465",
+          requireTLS: true,
           auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASSWORD,

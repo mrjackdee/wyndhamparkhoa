@@ -10,11 +10,11 @@ Updated October 13, 2026 (America/New_York).
 |---|---|
 | Design preview | Deployed, public, DRAFT watermark, no resident collection |
 | Preview address | https://wyndhamparkhoa-git-layout-preview-mrjackdees-projects.vercel.app |
-| Production application | Not released; secure storage and email provisioning remain blocked |
+| Production application | Protected deployment ready; owner sign-in and full release QA pending |
 | Neon database | Connected; private `wphoa` schema initialized and verified by Vercel build on October 13 |
-| Administrator | Intended owner: `jackdee.sync@gmail.com`; account and invitation not yet provisioned |
+| Administrator | Owner account created for `jackdee.sync@gmail.com`; password-setup email accepted by Brevo; sign-in pending |
 | Private uploads | Production private Blob store connected; live write/read, anonymous-access denial and test-file deletion verified |
-| Email | SMTP adapter implemented; no verified delivery service configured |
+| Email | Brevo configured; SMTP authentication verified; setup email accepted, inbox receipt pending |
 | Visual browser QA | Not executed; a supported browser-testing surface was unavailable |
 
 The working preview remains available while production is completed. It includes an explicitly disabled resident form and an unavailable-admin notice. It has no resident submission or authentication API routes. The privacy page describes intended production handling and must be reconciled with final providers before release.
@@ -132,7 +132,7 @@ Payload collections: `users`, `pages`, `news`, `dues`, `media`, `residents`, `su
 
 Server access functions re-read the user's active status and role from the database to enforce revocation. Public initial-admin registration is blocked. Never distribute shared/default credentials. The first owner account must be bootstrapped through secure configuration and recovery/invitation delivery.
 
-CMS supports versions and restoration, draft/published states, archive flags, event dates/location/cancellation, media categories and structured content. Public copy is rendered as text rather than arbitrary HTML. Some system text/layout and the preview roster are code-managed. Migrating the latest full roster to editable structured production fields is a remaining integration task; do not claim all visible copy is currently CMS-editable.
+CMS supports versions and restoration, draft/published states, archive flags, event dates/location/cancellation, media categories and structured content. Public copy is rendered as text rather than arbitrary HTML. Some system text/layout and the preview roster are code-managed. The full production roster is now stored in Site settings with editable groups, names, roles, optional phones, and source years. System copy and legal text remain code-managed.
 
 ## Resident data flow
 
@@ -231,3 +231,13 @@ See `docs/OWNER_GUIDE.md`, `docs/QA.md` and `docs/DEPLOYMENT.md` for supporting 
 ### Website legal pages and footer (October 13, 2026)
 
 The footer renders the current server year with `new Date().getFullYear()` on each dynamic request, includes the DonOra Global developer credit linking to https://www.DonOraGlobal.com, and links to `/privacy` and `/terms`. These dedicated routes take precedence over the catch-all route. Preview metadata and DRAFT markings remain in place. Privacy text distinguishes disabled preview functionality from planned connected services. Terms address website use, dated dues, external payments, developer responsibilities, content ownership, and legally limited warranty/liability provisions. They do not amend HOA governing documents or impose arbitration. Text is an owner-requested draft, not an attorney opinion or assurance of enforceability; Georgia counsel should review before final launch. Revise the policy date when practices change, not automatically with the copyright year.
+
+### Administrator and email setup status
+
+The owner account for jackdee.sync@gmail.com was created through `scripts/setup-owner.ts`, with a cryptographically random unshared password. Payload's password-reset flow issued the private setup email, and the Brevo SMTP transport accepted it. Inbox delivery and owner sign-in still require verification. The script refuses preview execution, does not reset an existing owner, and never logs tokens or credentials. Do not use the script as a normal build command after initial setup.
+
+Production SMTP variables are configured. SMTP authentication passed from Vercel with TLS. Brevo SMTP IP blocking was disabled by the owner because Vercel uses dynamic outbound addresses. API blocking was not changed. Keep the SMTP key secret, monitor sending activity, and rotate it if exposed. Gmail sender verification is complete, but Brevo can rewrite the outgoing sender because Gmail cannot be domain-authenticated by this account. An authenticated organization-controlled domain remains the preferred long-term setup. Brevo's free plan currently allows 300 sends per day and keys may deactivate after 90 days without successful use. No paid service was purchased.
+
+### Editable leadership roster
+
+Production Site settings now groups leadership rows into `Board Members` and `Standing Committees`; each row contains role, name (including Vacant), optional phone, and source year. The leadership page reads these fields. The dated 2026 payment-contact representatives remain separately recorded on the dues and contact pages. The idempotent database setup adds the grouping field to current and versioned settings tables and makes telephone numbers optional. `scripts/seed-roster.ts` loads the owner-supplied roster once and preserves an already updated roster.
