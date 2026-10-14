@@ -1,6 +1,7 @@
 import { buildConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { sqliteAdapter } from "@payloadcms/db-sqlite";
+import { privateBlobStorage } from "./lib/private-blob";
 import { s3Storage } from "@payloadcms/storage-s3";
 import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 import sharp from "sharp";
@@ -27,7 +28,7 @@ if (!local && !process.env.DATABASE_URL)
   );
 if (
   process.env.VERCEL &&
-  (!process.env.S3_BUCKET || !process.env.PAYLOAD_SECRET)
+  ((!process.env.S3_BUCKET && !process.env.BLOB_READ_WRITE_TOKEN && !process.env.BLOB_STORE_ID) || !process.env.PAYLOAD_SECRET)
 )
   throw new Error(
     "Private durable upload storage and a signing secret are required.",
@@ -134,7 +135,7 @@ export default buildConfig({
           throw new Error("Verified email service is not configured.");
         },
       }),
-  plugins: process.env.S3_BUCKET
+  plugins: (process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID) ? [privateBlobStorage()] : process.env.S3_BUCKET
     ? [
         s3Storage({
           collections: { media: true },
