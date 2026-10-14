@@ -81,9 +81,11 @@ export default async function Layout({
             </div>
           </div>
           <div className="footer-bottom">
-            <span>Wyndham Park Homeowners Association</span>
+            <span>© {new Date().getFullYear()} Wyndham Park Homeowners Association. All rights reserved.</span>
             <div>
-              <Link href="/privacy">Privacy</Link>
+              <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/terms">Terms of Service</Link>
+              <a href="https://www.DonOraGlobal.com">Site Developed by DonOra Global</a>
               <Link href="/admin">HOA administration</Link>
             </div>
           </div>
