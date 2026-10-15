@@ -1,13 +1,13 @@
 const roleEmails: Record<string, string> = {
   "President": "president", "Vice president": "vicepresident",
   "Secretary": "secretary", "Treasurer": "treasurer",
-  "Assistance Secretary": "asstsecretary", "Sargent-At-Arms": "sergeantatarms",
+  "Assistance Secretary": "asstsecretary", "Assistant Secretary": "asstsecretary", "Sargent-At-Arms": "sergeantatarms",
   "Membership Chairperson": "membership", "Finance Chairperson": "finance",
   "Safety/ Security Chairperson": "safetysecurity", "Beautification Chairperson": "beautification",
   "Grievance Chairperson": "grievance", "Public Relations Chairperson": "publicrelations",
 };
 function roleEmail(role: string) {
- const key = Object.keys(roleEmails).find(key => key.toLowerCase() === role.trim().toLowerCase());
+ const key = Object.keys(roleEmails).find(key => key.toLowerCase().replace(/[^a-z]/g, "") === role.toLowerCase().replace(/[^a-z]/g, ""));
  return key ? roleEmails[key] + "@wyndhamparkhoa.org" : undefined;
 }
 import { settings } from "@/lib/content";
