@@ -47,7 +47,7 @@ export default async function Layout({
   ];
   return (
     <html lang="en" className={inter.variable}>
-      <body><div className="preview-ribbon">DRAFT · Wyndham Park Homeowners Association</div>
+      <body>
         <a className="skip" href="#main">
           Skip to content
         </a>
