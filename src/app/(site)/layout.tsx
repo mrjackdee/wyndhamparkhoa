@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
 import Nav from "@/components/Nav";
 import { pages, news } from "@/lib/content";
-import { HOA_EMAIL, FACEBOOK } from "@/lib/facts";
+import { FACEBOOK } from "@/lib/facts";
 import "./site.css";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -72,7 +72,7 @@ export default async function Layout({
             <div>
               <p className="eyebrow">WYNDHAM PARK</p>
               <h2>Let’s stay connected.</h2>
-              <a href={"mailto:" + HOA_EMAIL}>{HOA_EMAIL}</a>
+              <a href="mailto:contact@wyndhamparkhoa.org">contact@wyndhamparkhoa.org</a>
             </div>
             <div className="footer-links">
               <Link href="/resident-signup">Update your contact details ↗</Link>
@@ -89,6 +89,7 @@ export default async function Layout({
               <Link href="/terms">Terms of Service</Link>
               <a href="https://www.DonOraGlobal.com">Site Developed by DonOra Global</a>
               <Link href="/admin">HOA administration</Link>
+              <a href="mailto:support@wyndhamparkhoa.org">Website issues or needs? support@wyndhamparkhoa.org</a>
             </div>
           </div>
         </footer>
