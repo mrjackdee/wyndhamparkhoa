@@ -47,7 +47,7 @@ export default async function Layout({
   ];
   return (
     <html lang="en" className={inter.variable}>
-      <body><div className="preview-ribbon">Design preview · Resident signup and administration are not available yet.</div>
+      <body>
         <a className="skip" href="#main">
           Skip to content
         </a>
