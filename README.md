@@ -253,3 +253,10 @@ Owner screenshot confirms access to the announcement editor. Still unverified: b
 ### Homepage and typography refinement
 
 The public site uses variable Inter through `next/font/google`, self-hosted in the deployed build with a Latin subset, swap loading, and an Arial fallback. Headings use weight 600 and balanced wrapping; body text remains 16px. The homepage Facebook section sits immediately below the entrance hero, wraps on smaller screens, and links to https://www.facebook.com/groups/3915883711993683 in a clearly announced new tab. It uses existing button focus/hover states and explains separate group approval. DRAFT markings remain. Local production build and changed TSX lint passed; visual browser verification remains outstanding.
+
+
+## Resident signup review usability fix (October 15, 2026)
+
+Open **Private records > Submissions**, then choose the person's name. The review panel appears at the top of their request and automatically checks possible matching residents. Review the submitted contact details below the panel. Search existing residents by name, address, or email when needed. For a new registration, choose a new record or an existing resident. An update request must be matched to an existing resident. Confirm the review, then select **Approve and add resident** or **Approve and update resident**. The success message appears only after the server commits the resident and submission changes. Saving internal notes does not approve the request.
+
+No manual record IDs are needed for signup review. Approval controls use explicit non-submit buttons so they cannot accidentally submit the surrounding CMS edit form. Requests in progress disable approval. Reviewed requests show a link to resident records. The administrator-only API, transaction, unique review claim, and audit behavior remain unchanged. Editors and public visitors cannot approve requests or search private resident records. This UI-only field does not add database columns.
