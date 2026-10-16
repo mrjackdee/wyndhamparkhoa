@@ -18,9 +18,7 @@ export default function AdminWelcome() {
         View website ↗
       </Link>
       <p>
-        New administrators: create a user with their individual email and role,
-        then send an invitation from the resident tools page. Email delivery
-        must be configured first.
+        Administrators: open Access → Users → Create New. Enter the member’s assigned HOA email, an individual password, and the Board Member role. Keep Active checked and save. Share credentials privately. Board members can open Private records → Submissions to review and approve requests, then download the Excel roster from Residents. Only administrators manage user access.
       </p>
     </section>
   );

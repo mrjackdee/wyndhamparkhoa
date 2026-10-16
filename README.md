@@ -275,3 +275,14 @@ Verification: nine automated unit/workbook checks pass; seventeen isolated SQLit
 The Payload CSRF allowlist explicitly includes https://www.wyndhamparkhoa.org, https://wyndhamparkhoa.org, https://wyndhamparkhoa.vercel.app and the configured NEXT_PUBLIC_SITE_URL. It is never derived from request headers. Custom admin actions still require same-origin requests and an active administrator. Submission duplicate-check failures display an error and a Try again button without approving or changing the submission. Existing pending submissions can use this workflow without resubmitting.
 
 The isolated resident-review regression script checks authenticated duplicate lookups on all three deployed hostnames, rejection of an untrusted origin, approval, repeat approval protection, and private Excel export. These tests use synthetic records in local SQLite, not live resident data.
+
+
+### Board member accounts and resident roster
+
+Administrators create individual accounts under Access → Users → Create New using the assigned HOA email, an individual password, role Board Member, and Active enabled. Share initial credentials privately; the email must have working forwarding for password recovery. Alternatively, send a secure password setup invitation from the administrator’s resident tools. No shared/default account is provided.
+
+Board Members can review pending submissions, approve a new resident or apply a reviewed update to a selected existing resident, search and edit the private roster, manage public content, and download the same formatted Excel roster as administrators. They cannot invite/remove users, permanently delete resident records, merge duplicates, or access administrator-only settings. Content Editors cannot access resident records or exports. Every privileged request checks the current database role and Active status, so revocation applies to existing sessions.
+
+The Residents list defaults to name, address, mobile, email, Website signup date, and status. Website signup date is copied from the original submission when a new roster record is approved, including previously pending submissions. Updates preserve that original date. Migration backfills existing linked reviewed new registrations; unlinked/manual records remain blank rather than inventing a signup date. The formatted Excel workbook includes this date in UTC.
+
+Vercel builds run scripts/migrate-database.mjs before Next.js compilation. The idempotent additive migration adds the board role and nullable signed_up_at column under an advisory lock, with no resident deletion. It backfills only null dates from linked reviewed new submissions. Keep database backups before future schema changes. The isolated regression test covers board approval/export, editor denial, board invitation denial, and access revocation; production deployment confirms migration/build success but does not substitute for an authenticated board walkthrough.

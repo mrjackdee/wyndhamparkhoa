@@ -6,6 +6,7 @@ import type {
 } from "payload";
 import {
   admin,
+  residentManager,
   staff,
   published,
   publicMedia,
@@ -147,7 +148,7 @@ export const Users: CollectionConfig = {
       type: "select",
       required: true,
       defaultValue: "editor",
-      options: ["administrator", "editor"],
+      options: [{ label: "Administrator", value: "administrator" }, { label: "Board Member", value: "board" }, { label: "Content Editor", value: "editor" }],
       saveToJWT: true,
     },
     { name: "active", type: "checkbox", defaultValue: true, saveToJWT: true },
@@ -170,7 +171,7 @@ export const Users: CollectionConfig = {
         if (
           originalDoc?.role === "administrator" &&
           originalDoc.active &&
-          (data.role === "editor" || data.active === false)
+          ((data.role && data.role !== "administrator") || data.active === false)
         ) {
           const count = await req.payload.count({
             collection: "users",
@@ -386,19 +387,20 @@ export const Residents: CollectionConfig = {
   admin: {
     useAsTitle: "name",
     group: "Private records",
-    defaultColumns: ["name", "address", "email", "status", "updatedAt"],
+    defaultColumns: ["name", "address", "mobile", "email", "signedUpAt", "status"],
     listSearchableFields: ["name", "address", "email"],
     components: { beforeList: ["@/components/AdminTools#ResidentTools"] },
   },
   access: {
-    create: admin,
-    read: admin,
-    update: admin,
+    create: residentManager,
+    read: residentManager,
+    update: residentManager,
     delete: admin,
-    readVersions: admin,
+    readVersions: residentManager,
   },
   fields: [
     ...contact,
+    { name: "signedUpAt", label: "Website signup date", type: "date", admin: { readOnly: true, description: "Original website submission date. Blank for manually added records without a linked signup." }, access: { update: () => false } },
     {
       name: "status",
       type: "select",
@@ -451,7 +453,7 @@ export const Submissions: CollectionConfig = {
     listSearchableFields: ["name", "address", "email"],
     components: { beforeList: ["@/components/AdminTools#ReviewTools"] },
   },
-  access: { create: nobody, read: admin, update: admin, delete: admin },
+  access: { create: nobody, read: residentManager, update: residentManager, delete: admin },
   fields: [
     {
       name: "reviewSubmission",

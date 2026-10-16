@@ -10,7 +10,8 @@ export async function POST(request: Request) {
   const payload = await getPayload({ config });
   const auth = await payload.auth({ headers: request.headers });
   const req = await createLocalReq({ user: auth.user ?? undefined }, payload);
-  if ((await role(req)) !== "administrator")
+  const userRole = await role(req);
+  if (userRole !== "administrator" && userRole !== "board")
     return Response.json(
       { error: "Administrator access required." },
       { status: 403 },
@@ -21,6 +22,8 @@ export async function POST(request: Request) {
   } catch {
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }
+  if (userRole === "board" && !["duplicates", "review", "export", "export-xlsx"].includes(data.action))
+    return Response.json({ error: "Administrator access required for this action." }, { status: 403 });
   try {
     if (data.action === "export" || data.action === "export-xlsx") {
       const rows = await payload.find({
@@ -40,6 +43,7 @@ export async function POST(request: Request) {
         "textGroup",
         "facebookGroup",
         "status",
+        "signedUpAt",
         "createdAt",
         "updatedAt",
       ] as const;
@@ -161,7 +165,7 @@ export async function POST(request: Request) {
               collection: "residents",
               overrideAccess: false,
               req,
-              data: fields,
+              data: { ...fields, signedUpAt: s.createdAt },
             });
         await payload.update({
           collection: "submissions",
@@ -278,8 +282,8 @@ export async function POST(request: Request) {
       });
       let invited = users.docs[0];
       if (!invited) {
-        if (!["administrator", "editor"].includes(data.role))
-          throw new Error("Choose an administrator or editor role.");
+        if (!["administrator", "editor", "board"].includes(data.role))
+          throw new Error("Choose an administrator, board member, or editor role.");
         invited = await payload.create({
           collection: "users",
           overrideAccess: false,

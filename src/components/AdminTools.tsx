@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useDocumentInfo } from "@payloadcms/ui";
+import { useAuth, useDocumentInfo } from "@payloadcms/ui";
 async function action(data: Record<string, unknown>) {
   const r = await fetch("/api/admin-tools", {
     method: "POST",
@@ -15,6 +15,8 @@ async function action(data: Record<string, unknown>) {
   return r;
 }
 export function ResidentTools() {
+  const { user } = useAuth();
+  const isAdministrator = user?.role === "administrator";
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("editor");
@@ -63,7 +65,7 @@ export function ResidentTools() {
       <button type="button" onClick={() => run("export-xlsx")}>
         Download formatted Excel list
       </button>
-      <details style={{ marginTop: 24 }}>
+      {isAdministrator && <details style={{ marginTop: 24 }}>
         <summary>Notification delivery</summary>
         <p>
           Retry HOA notifications that could not be delivered. Resident
@@ -72,8 +74,8 @@ export function ResidentTools() {
         <button onClick={() => run("retry-notifications")}>
           Retry pending notifications
         </button>
-      </details>
-      <details style={{ marginTop: 24 }}>
+      </details>}
+      {isAdministrator && <details style={{ marginTop: 24 }}>
         <summary>Invite a board member or content editor</summary>
         <p>
           Administrators can manage private resident records and user access.
@@ -93,15 +95,16 @@ export function ResidentTools() {
             value={inviteRole}
             onChange={(e) => setInviteRole(e.target.value)}
           >
-            <option value="editor">Editor</option>
+            <option value="board">Board Member</option>
+          <option value="editor">Editor</option>
             <option value="administrator">Administrator</option>
           </select>
         </label>
         <button onClick={() => run("invite")}>
           Send secure user invitation
         </button>
-      </details>
-      <details style={{ marginTop: 24 }}>
+      </details>}
+      {isAdministrator && <details style={{ marginTop: 24 }}>
         <summary>Combine duplicate resident records</summary>
         <p>
           Open both records and compare their details first. The record to keep
@@ -140,7 +143,7 @@ export function ResidentTools() {
         >
           Merge reviewed records
         </button>
-      </details>
+      </details>}
       <p role="status">{message}</p>
     </section>
   );

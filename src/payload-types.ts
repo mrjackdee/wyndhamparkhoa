@@ -143,7 +143,7 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
-  role: 'administrator' | 'editor';
+  role: 'administrator' | 'board' | 'editor';
   active?: boolean | null;
   name?: string | null;
   updatedAt: string;
@@ -173,6 +173,9 @@ export interface User {
 export interface Page {
   id: number;
   title: string;
+  /**
+   * The final part of the page link. Example: sample-news-announcement. Use lowercase words separated by hyphens; avoid changing this after publication.
+   */
   slug: string;
   summary: string;
   /**
@@ -198,6 +201,9 @@ export interface Page {
 export interface News {
   id: number;
   title: string;
+  /**
+   * The final part of the page link. Example: sample-news-announcement. Use lowercase words separated by hyphens; avoid changing this after publication.
+   */
   slug: string;
   summary: string;
   /**
@@ -293,6 +299,10 @@ export interface Resident {
   email: string;
   textGroup: 'yes' | 'no';
   facebookGroup: 'yes' | 'no';
+  /**
+   * Original website submission date. Blank for manually added records without a linked signup.
+   */
+  signedUpAt?: string | null;
   status: 'active' | 'archived';
   notes?: string | null;
   preferenceHistory?:
@@ -594,6 +604,7 @@ export interface ResidentsSelect<T extends boolean = true> {
   email?: T;
   textGroup?: T;
   facebookGroup?: T;
+  signedUpAt?: T;
   status?: T;
   notes?: T;
   preferenceHistory?:

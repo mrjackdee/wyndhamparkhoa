@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import ExcelJS from "exceljs";
 import { residentWorkbook } from "../src/lib/resident-workbook";
 test("resident Excel export preserves literal data, preferences, and usable formatting", async () => {
- const bytes = await residentWorkbook([{name:'=HYPERLINK("https://example.invalid")',spouseName:null,address:"123 Synthetic Lane",mobile:"0012345678",email:"qa@example.invalid",textGroup:"no",facebookGroup:"yes",status:"active",createdAt:"2026-01-01T00:00:00Z",updatedAt:"2026-01-02T00:00:00Z"}]);
+ const bytes = await residentWorkbook([{name:'=HYPERLINK("https://example.invalid")',spouseName:null,address:"123 Synthetic Lane",mobile:"0012345678",email:"qa@example.invalid",textGroup:"no",facebookGroup:"yes",status:"active",signedUpAt:"2025-12-25T00:00:00Z",createdAt:"2026-01-01T00:00:00Z",updatedAt:"2026-01-02T00:00:00Z"}]);
  const workbook = new ExcelJS.Workbook(); await workbook.xlsx.load(bytes.buffer as ArrayBuffer);
  const sheet=workbook.getWorksheet("Resident contacts")!;
  assert.equal(sheet.getCell("A6").value,'=HYPERLINK("https://example.invalid")');
@@ -12,6 +12,8 @@ test("resident Excel export preserves literal data, preferences, and usable form
  assert.equal(sheet.getCell("F6").value,"No"); assert.equal(sheet.getCell("G6").value,"Yes");
  assert.equal(sheet.views[0].state,"frozen"); assert.ok(sheet.autoFilter);
  assert.equal(sheet.getRow(5).getCell(1).value,"Name");
+ assert.equal((sheet.getCell("I6").value as Date).toISOString(),"2025-12-25T00:00:00.000Z");
+ assert.equal(sheet.getCell("I5").value,"Website signup (UTC)");
  assert.equal(sheet.rowCount,6);
 });
 test("empty resident export remains a valid labeled workbook", async()=>{

@@ -9,6 +9,7 @@ type ExportResident = {
   textGroup: string;
   facebookGroup: string;
   status: string;
+  signedUpAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -82,7 +83,7 @@ export async function residentWorkbook(
     "Text group preference",
     "Facebook preference",
     "Record status",
-    "Created (UTC)",
+    "Website signup (UTC)",
     "Updated (UTC)",
   ];
   sheet.getRow(5).values = headers;
@@ -108,7 +109,7 @@ export async function residentWorkbook(
       resident.textGroup === "yes" ? "Yes" : "No",
       resident.facebookGroup === "yes" ? "Yes" : "No",
       resident.status,
-      date(resident.createdAt),
+      date(resident.signedUpAt ?? ""),
       date(resident.updatedAt),
     ]);
     row.height = 34;

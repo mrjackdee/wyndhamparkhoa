@@ -21,6 +21,12 @@ try {
   for (const table of ['site_settings_leadership', '_site_settings_v_version_leadership']) {
     await query(`ALTER TABLE wphoa.${table} ADD COLUMN IF NOT EXISTS "group" varchar DEFAULT 'Board Members', ALTER COLUMN phone DROP NOT NULL`);
   }
+  await query("ALTER TYPE wphoa.enum_users_role ADD VALUE IF NOT EXISTS 'board'");
+  await query('ALTER TABLE wphoa.residents ADD COLUMN IF NOT EXISTS signed_up_at timestamp(3) with time zone');
+  await query(`UPDATE wphoa.residents r SET signed_up_at = s.first_signup
+    FROM (SELECT resident_id, min(created_at) AS first_signup FROM wphoa.submissions
+      WHERE resident_id IS NOT NULL AND request_type = 'new' AND status = 'reviewed'
+      GROUP BY resident_id) s WHERE r.id = s.resident_id AND r.signed_up_at IS NULL`);
   const check = await query("SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema='wphoa'");
   if (check.rows[0].count < 20) throw new Error('Schema verification failed.');
   await query('COMMIT');

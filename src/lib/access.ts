@@ -1,7 +1,7 @@
 import type { Access, PayloadRequest, Where } from "payload";
 export async function role(
   req: PayloadRequest,
-): Promise<"administrator" | "editor" | null> {
+): Promise<"administrator" | "editor" | "board" | null> {
   if (!req.user?.id) return null;
   const user = await req.payload.findByID({
     collection: "users",
@@ -27,3 +27,5 @@ export const published: Access = async ({ req }) =>
 export const publicMedia: Access = async ({ req }) =>
   (await role(req)) ? true : { visibility: { equals: "public" } };
 export const nobody: Access = () => false;
+
+export const residentManager: Access = async ({ req }) => ["administrator", "board"].includes((await role(req)) ?? "");
