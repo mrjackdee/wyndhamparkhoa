@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }
   try {
-    if (data.action === "export") {
+    if (data.action === "export" || data.action === "export-xlsx") {
       const rows = await payload.find({
         collection: "residents",
         limit: 0,
@@ -53,11 +53,25 @@ export async function POST(request: Request) {
         req,
         data: {
           actor: String(auth.user!.id),
-          action: "csv-export",
+          action: data.action === "export-xlsx" ? "xlsx-export" : "csv-export",
           entity: "residents",
           recordID: "all",
         },
       });
+      if (data.action === "export-xlsx") {
+        const { residentWorkbook } = await import("@/lib/resident-workbook");
+        const bytes = await residentWorkbook(rows.docs);
+        return new Response(bytes, {
+          headers: {
+            "Content-Type":
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Content-Disposition":
+              'attachment; filename="wyndham-park-residents.xlsx"',
+            "Cache-Control": "private, no-store",
+            "X-Content-Type-Options": "nosniff",
+          },
+        });
+      }
       return new Response("\uFEFF" + csv, {
         headers: {
           "Content-Type": "text/csv; charset=utf-8",

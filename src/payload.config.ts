@@ -47,6 +47,7 @@ export default buildConfig({
   },
   db: local
     ? sqliteAdapter({
+        transactionOptions: {},
         client: {
           url: process.env.TEST_DATABASE_URL ?? "file:./local-test.db",
         },

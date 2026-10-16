@@ -31,11 +31,14 @@ export function ResidentTools() {
         targetID,
         confirm,
       });
-      if (type === "export") {
+      if (type === "export" || type === "export-xlsx") {
         const url = URL.createObjectURL(await r.blob());
         const a = document.createElement("a");
         a.href = url;
-        a.download = "wyndham-park-residents.csv";
+        a.download =
+          type === "export-xlsx"
+            ? "wyndham-park-residents.xlsx"
+            : "wyndham-park-residents.csv";
         a.click();
         URL.revokeObjectURL(url);
         setMessage("Export downloaded. Keep this file private.");
@@ -46,73 +49,98 @@ export function ResidentTools() {
   }
   return (
     <section className="hoa-tools">
-      <h2>Resident administration</h2>
+      <h2>Resident records</h2>
+      <p>
+        <Link href="/admin/collections/submissions">
+          Review new signups and update requests
+        </Link>
+      </p>
       <p>
         Search the list by name, email, or address. Open a record to change its
         details, notes, or archive status. Preference changes are timestamped
         automatically.
       </p>
-      <button onClick={() => run("export")}>Export private CSV</button>
-      <button onClick={() => run("retry-notifications")}>
-        Retry pending notifications
+      <button type="button" onClick={() => run("export-xlsx")}>
+        Download formatted Excel list
       </button>
-      <label>
-        User email
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </label>
-      <label>
-        New user role
-        <select
-          value={inviteRole}
-          onChange={(e) => setInviteRole(e.target.value)}
-        >
-          <option value="editor">Editor</option>
-          <option value="administrator">Administrator</option>
-        </select>
-      </label>
-      <button onClick={() => run("invite")}>Send secure user invitation</button>
-      <h3>Merge reviewed duplicate records</h3>
-      <p>
-        Open both records and compare their details first. The survivor keeps
-        its contact details and preferences. The duplicate is archived and its
-        reviewed submissions are reassigned.
-      </p>
-      <label>
-        Duplicate resident ID
-        <input
+      <details style={{ marginTop: 24 }}>
+        <summary>Notification delivery</summary>
+        <p>
+          Retry HOA notifications that could not be delivered. Resident
+          information is already saved.
+        </p>
+        <button onClick={() => run("retry-notifications")}>
+          Retry pending notifications
+        </button>
+      </details>
+      <details style={{ marginTop: 24 }}>
+        <summary>Invite a board member or content editor</summary>
+        <p>
+          Administrators can manage private resident records and user access.
+          Editors can update public content only.
+        </p>
+        <label>
+          User email
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </label>
+        <label>
+          New user role
+          <select
+            value={inviteRole}
+            onChange={(e) => setInviteRole(e.target.value)}
+          >
+            <option value="editor">Editor</option>
+            <option value="administrator">Administrator</option>
+          </select>
+        </label>
+        <button onClick={() => run("invite")}>
+          Send secure user invitation
+        </button>
+      </details>
+      <details style={{ marginTop: 24 }}>
+        <summary>Combine duplicate resident records</summary>
+        <p>
+          Open both records and compare their details first. The record to keep
+          retains its contact details and preferences. The duplicate is archived
+          and its reviewed submissions are reassigned.
+        </p>
+        <ResidentPicker
+          label="Duplicate record to archive"
           value={sourceID}
-          onChange={(e) => {
-            setSourceID(e.target.value);
+          onChange={(value) => {
+            setSourceID(value);
             setConfirm(false);
           }}
         />
-      </label>
-      <label>
-        Surviving resident ID
-        <input
+        <ResidentPicker
+          label="Resident record to keep"
           value={targetID}
-          onChange={(e) => {
-            setTargetID(e.target.value);
+          onChange={(value) => {
+            setTargetID(value);
             setConfirm(false);
           }}
         />
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={confirm}
-          style={{ display: "inline", width: "auto" }}
-          onChange={(e) => setConfirm(e.target.checked)}
-        />{" "}
-        I reviewed both records and selected the survivor.
-      </label>
-      <button disabled={!confirm} onClick={() => run("merge")}>
-        Merge reviewed records
-      </button>
+        <label>
+          <input
+            type="checkbox"
+            checked={confirm}
+            style={{ display: "inline", width: "auto" }}
+            onChange={(e) => setConfirm(e.target.checked)}
+          />{" "}
+          I compared both records and selected the one to keep.
+        </label>
+        <button
+          type="button"
+          disabled={!confirm || !sourceID || !targetID || sourceID === targetID}
+          onClick={() => run("merge")}
+        >
+          Merge reviewed records
+        </button>
+      </details>
       <p role="status">{message}</p>
     </section>
   );
@@ -339,5 +367,70 @@ function ReviewPanel({ id, isUpdate }: { id: string; isUpdate: boolean }) {
       </button>
       <p role="status">{message}</p>
     </section>
+  );
+}
+
+function ResidentPicker({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<ResidentMatch[]>([]);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function search() {
+    setBusy(true);
+    onChange("");
+    setResults([]);
+    setMessage("");
+    try {
+      const params = new URLSearchParams({ depth: "0", limit: "50" });
+      ["name", "address", "email"].forEach((field, i) =>
+        params.set(`where[or][${i}][${field}][contains]`, query.trim()),
+      );
+      const response = await fetch(`/api/residents?${params}`);
+      if (!response.ok) throw new Error("Search failed. Please try again.");
+      const data = await response.json();
+      setResults(data.docs);
+      if (!data.docs.length) setMessage("No matching residents found.");
+    } catch {
+      setMessage("Search failed. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <fieldset>
+      <legend>{label}</legend>
+      <label>
+        Search by name, address, or email
+        <input value={query} onChange={(e) => setQuery(e.target.value)} />
+      </label>
+      <button type="button" disabled={busy || !query.trim()} onClick={search}>
+        {busy ? "Searching…" : "Search"}
+      </button>
+      <label>
+        Choose resident
+        <select value={value} onChange={(e) => onChange(e.target.value)}>
+          <option value="">Select a resident</option>
+          {results.map((r) => (
+            <option key={r.id} value={String(r.id)}>
+              {r.name} · {r.address} · {r.email}
+            </option>
+          ))}
+        </select>
+      </label>
+      {value && (
+        <Link href={`/admin/collections/residents/${value}`} target="_blank">
+          Open selected record to compare (new tab)
+        </Link>
+      )}
+      <p role="status">{message}</p>
+    </fieldset>
   );
 }
