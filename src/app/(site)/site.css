@@ -917,3 +917,14 @@ h1 em { font-weight: 600; }
 .hero h1 { font-size: clamp(36px, 4.2vw, 60px); line-height: 1.14; }
 .dues-stamp strong, .dues-heading > span { font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
 @media(max-width:760px) { .hero h1 { font-size: clamp(32px, 8.5vw, 44px); } .wordmark { font-size: 14px; } }
+
+/* Feedback controls follow the existing resident form design. */
+.signup-form select, .signup-form textarea {
+  width: 100%; min-width: 0; border: 1px solid #8a958a;
+  background: transparent; color: inherit; padding: 12px;
+  min-height: 48px; border-radius: 0; font: inherit;
+}
+.signup-form textarea { resize: vertical; }
+.signup-form .check { display: block; margin: 24px 0; font-size: 14px; line-height: 1.6; }
+.signup-form .check input { width: 18px; height: 18px; margin-right: 8px; accent-color: var(--green); vertical-align: middle; }
+.signup-form [role="alert"]:not(:empty) { margin: 20px 0; color: #872c20; }
