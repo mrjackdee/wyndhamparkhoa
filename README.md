@@ -306,3 +306,10 @@ Verification: 11 unit tests passed, isolated feedback tests verified board/edito
 The CMS owns /api/feedback and /api/feedback/:id for authorized listing, reading, updating, and deletion. Public form submissions use /api/website-feedback. Private attachment downloads and notification retries use /api/feedback-tools/:id. Do not add custom Next.js routes under /api/feedback, because they shadow the CMS REST handler and cause Save/Delete failures.
 
 scripts/test-feedback-http.mjs targets only http://localhost:3000 with synthetic route-test accounts. It verifies Board Member save via PATCH, persistence after a fresh login, Editor denial, Board Member deletion denial, Administrator deletion via DELETE, private attachment-tools permissions, public submission, and idempotent retry. This HTTP test supplements Local API tests, which cannot detect Next.js route collisions. The original issue affected existing feedback records without deleting them; no data migration is needed for this fix.
+
+
+### Board leadership editing
+
+Board Members and Administrators can open Site settings, edit the Leadership entries, and save changes. Changes are reflected on HOA & Leadership. Board Members cannot change the hero photo, its crop position, or the homepage introduction; those fields remain administrator-only through server-enforced field permissions. Editors and anonymous visitors cannot update Site settings. Existing accounts keep their assigned role; no account privileges were changed individually.
+
+scripts/test-leadership-http.mjs verifies real HTTP Board Member roster updates, the public page rendering the saved name, denied edits to unrelated settings, and denied Editor/anonymous updates using synthetic local data only.

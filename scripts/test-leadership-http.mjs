@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+const base='http://localhost:3000';
+const login=async(email)=>{const r=await fetch(base+'/api/users/login',{method:'POST',headers:{origin:base,'content-type':'application/json'},body:JSON.stringify({email,password:'synthetic-route-test-password'})});assert.equal(r.status,200);return(await r.json()).token;};
+const call=(token,data)=>fetch(base+'/api/globals/site-settings',{method:'POST',headers:{origin:base,'content-type':'application/json',cookie:`payload-token=${token}`},body:JSON.stringify(data)});
+const admin=await login('route-admin@example.invalid');const board=await login('route-board@example.invalid');const editor=await login('route-editor@example.invalid');
+assert.equal((await call(admin,{intro:'Synthetic original introduction.',heroPosition:'center'})).status,200);
+const result=await call(board,{leadership:[{name:'Synthetic Board Leader',role:'President',group:'Board Members',sourceYear:2026}],intro:'Unauthorized replacement',heroPosition:'bottom'});
+assert.equal(result.status,200,await result.text());
+const saved=await(await fetch(base+'/api/globals/site-settings')).json();assert.equal(saved.leadership[0].name,'Synthetic Board Leader');assert.equal(saved.intro,'Synthetic original introduction.');assert.equal(saved.heroPosition,'center');
+assert.equal((await call(editor,{leadership:[]})).status,403);assert.equal((await call('',{leadership:[]})).status,403);
+const page=await(await fetch(base+'/hoa-and-leadership')).text();assert.ok(page.includes('Synthetic Board Leader'));
+console.log('PASS: board leadership save and public rendering; unrelated settings protected; editor and anonymous writes denied.');

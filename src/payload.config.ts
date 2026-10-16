@@ -20,7 +20,7 @@ import {
   Audit,
   ReviewClaims,
 } from "./collections";
-import { admin, staff } from "./lib/access";
+import { staff, residentManager, role } from "./lib/access";
 const databaseSchema = process.env.HOA_QA_SCHEMA ?? "wphoa";
 if (databaseSchema !== "wphoa" && !/^wphoa_qa_[a-f0-9]{12}$/.test(databaseSchema)) throw new Error("Invalid isolated QA schema");
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -84,11 +84,12 @@ export default buildConfig({
     {
       slug: "site-settings",
       label: "Site settings",
-      access: { read: () => true, update: admin, readVersions: staff },
+      access: { read: () => true, update: residentManager, readVersions: staff },
       versions: { max: 30 },
       fields: [
         {
           name: "hero",
+          access: { update: async ({ req }) => (await role(req)) === "administrator" },
           type: "upload",
           relationTo: "media",
           filterOptions: {
@@ -100,12 +101,14 @@ export default buildConfig({
         },
         {
           name: "heroPosition",
+          access: { update: async ({ req }) => (await role(req)) === "administrator" },
           type: "select",
           defaultValue: "center",
           options: ["center", "top", "bottom"],
         },
         {
           name: "intro",
+          access: { update: async ({ req }) => (await role(req)) === "administrator" },
           type: "textarea",
           required: true,
           defaultValue:
