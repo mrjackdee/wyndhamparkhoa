@@ -10,7 +10,7 @@ export default function FeedbackReview() {
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     if (!id) return;
-    fetch(`/api/feedback/${id}`)
+    fetch(`/api/feedback-tools/${id}`)
       .then(async (r) => {
         if (!r.ok) throw new Error();
         return r.json();
@@ -33,7 +33,7 @@ export default function FeedbackReview() {
         <ul>
           {files.map((f) => (
             <li key={f.index}>
-              <a href={`/api/feedback/${id}?attachment=${f.index}`}>
+              <a href={`/api/feedback-tools/${id}?attachment=${f.index}`}>
                 {f.name} ({Math.ceil(f.size / 1024)} KB)
               </a>
             </li>
@@ -51,7 +51,7 @@ export default function FeedbackReview() {
         onClick={async () => {
           setBusy(true);
           try {
-            const r = await fetch(`/api/feedback/${id}`, { method: "POST" });
+            const r = await fetch(`/api/feedback-tools/${id}`, { method: "POST" });
             const d = await r.json();
             setMessage(
               r.ok && d.sent

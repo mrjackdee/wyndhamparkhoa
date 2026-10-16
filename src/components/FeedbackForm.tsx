@@ -43,7 +43,7 @@ export default function FeedbackForm() {
         data.set("token", token.current);
         data.set("idempotencyKey", id.current);
         try {
-          const r = await fetch("/api/feedback", {
+          const r = await fetch("/api/website-feedback", {
             method: "POST",
             body: data,
           });

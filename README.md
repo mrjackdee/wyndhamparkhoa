@@ -299,3 +299,10 @@ Every newly saved feedback record queues a minimal Brevo notification to support
 Protection includes server validation, same-origin checking, signed time-bound form tokens, a honeypot, a durable five-per-hour rate limit, and unique request IDs for safe retries. The privacy notice describes feedback processing. Existing database/Blob backups should include the feedback table and feedback/ object prefix. Attachments count toward existing Blob storage/transfer usage; no paid service has been added.
 
 Verification: 11 unit tests passed, isolated feedback tests verified board/editor/public boundaries and notification failure/retry, and an HTTP test against a running local production build verified invalid input, durable submission, duplicate retry, and private detail denial. Production build and type checks passed. Browser installation failed in the test environment; responsive visual and authenticated production attachment-upload/email-delivery checks remain manual handoff checks. Synthetic tests did not send real notification emails or alter live resident records.
+
+
+### Feedback route separation and regression checks
+
+The CMS owns /api/feedback and /api/feedback/:id for authorized listing, reading, updating, and deletion. Public form submissions use /api/website-feedback. Private attachment downloads and notification retries use /api/feedback-tools/:id. Do not add custom Next.js routes under /api/feedback, because they shadow the CMS REST handler and cause Save/Delete failures.
+
+scripts/test-feedback-http.mjs targets only http://localhost:3000 with synthetic route-test accounts. It verifies Board Member save via PATCH, persistence after a fresh login, Editor denial, Board Member deletion denial, Administrator deletion via DELETE, private attachment-tools permissions, public submission, and idempotent retry. This HTTP test supplements Local API tests, which cannot detect Next.js route collisions. The original issue affected existing feedback records without deleting them; no data migration is needed for this fix.

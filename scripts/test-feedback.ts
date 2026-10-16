@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { getPayload, createLocalReq } from "payload";
 import config from "../src/payload.config";
 import { notifyFeedback } from "../src/lib/feedback";
-import { GET } from "../src/app/api/feedback/[id]/route";
+import { GET } from "../src/app/api/feedback-tools/[id]/route";
 if (
   process.env.LOCAL_TEST_MODE !== "true" ||
   process.env.VERCEL ||
@@ -50,7 +50,7 @@ try {
   assert.equal(
     (
       await GET(
-        new Request(`http://localhost:3000/api/feedback/${doc.id}`),
+        new Request(`http://localhost:3000/api/feedback-tools/${doc.id}`),
         context,
       )
     ).status,
@@ -71,7 +71,7 @@ try {
       data: { email: u.email, password: "synthetic-feedback-password" },
     });
     const r = await GET(
-      new Request(`http://localhost:3000/api/feedback/${doc.id}`, {
+      new Request(`http://localhost:3000/api/feedback-tools/${doc.id}`, {
         headers: {
           origin: "http://localhost:3000",
           cookie: `payload-token=${login.token}`,

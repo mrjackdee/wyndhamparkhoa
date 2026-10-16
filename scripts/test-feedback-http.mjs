@@ -1,0 +1,22 @@
+// Run only against the isolated local production server, never a deployed site.
+import assert from 'node:assert/strict';
+const base='http://localhost:3000';
+const login=async(email)=>{const r=await fetch(base+'/api/users/login',{method:'POST',headers:{origin:base,'content-type':'application/json'},body:JSON.stringify({email,password:'synthetic-route-test-password'})});assert.equal(r.status,200);return (await r.json()).token;};
+const admin=await login('route-admin@example.invalid');
+const board=await login('route-board@example.invalid');
+const editor=await login('route-editor@example.invalid');
+const call=(path,token,method='GET',data)=>fetch(base+path,{method,headers:{origin:base,'content-type':'application/json',cookie:`payload-token=${token}`},...(data?{body:JSON.stringify(data)}:{})});
+const list=await call('/api/feedback',board);assert.equal(list.status,200);const docs=(await list.json()).docs;const id=docs.find(d=>d.subject==='Synthetic route regression').id;
+const path='/api/feedback/'+id;
+const saved=await call(path,board,'PATCH',{notes:'Board review saved through real HTTP.',status:'reviewing'});assert.equal(saved.status,200,await saved.text());
+const newSession=await login('route-board@example.invalid');const read=await call(path,newSession);assert.equal(read.status,200);const doc=await read.json();assert.equal(doc.notes,'Board review saved through real HTTP.');assert.equal(doc.status,'reviewing');assert.equal(doc.attachments,undefined);
+assert.equal((await call(path,editor,'PATCH',{notes:'Not allowed'})).status,403);
+assert.equal((await call(path,board,'DELETE')).status,403);
+assert.equal((await call('/api/feedback-tools/'+id,board)).status,200);
+assert.equal((await call('/api/feedback-tools/'+id,editor)).status,403);
+const removed=await call(path,admin,'DELETE');assert.equal(removed.status,200,await removed.text());assert.equal((await call(path,admin)).status,404);
+const token=await(await fetch(base+'/api/form-token')).json();await new Promise(r=>setTimeout(r,1600));const key=crypto.randomUUID();
+const form=()=>{const f=new FormData();for(const[k,v]of Object.entries({name:'Synthetic public route',email:'qa@example.invalid',category:'suggestion',subject:'Synthetic public submission',message:'Testing the separated public feedback endpoint.',pageUrl:'',website:'',privacy:'on',token:token.token,idempotencyKey:key}))f.set(k,v);return f;};
+const submit=()=>fetch(base+'/api/website-feedback',{method:'POST',headers:{origin:base},body:form()});
+const first=await submit();assert.equal(first.status,201,await first.text());assert.equal((await submit()).status,200);
+console.log('PASS: real HTTP board save and new-session persistence; editor denied; board deletion denied; admin deletion succeeds; private tools remain restricted; public feedback saves without duplicate retry.');
