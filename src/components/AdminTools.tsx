@@ -9,8 +9,8 @@ async function action(data: Record<string, unknown>) {
     body: JSON.stringify(data),
   });
   if (!r.ok) {
-    const e = await r.json();
-    throw new Error(e.error);
+    const e = await r.json().catch(() => ({}));
+    throw new Error(e.error || "The request could not be completed. Please try again.");
   }
   return r;
 }
@@ -193,6 +193,8 @@ function ReviewPanel({ id, isUpdate }: { id: string; isUpdate: boolean }) {
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [approved, setApproved] = useState(false);
+  const [lookupError, setLookupError] = useState("");
+  const [attempt, setAttempt] = useState(0);
   const [message, setMessage] = useState("");
   useEffect(() => {
     let active = true;
@@ -204,16 +206,13 @@ function ReviewPanel({ id, isUpdate }: { id: string; isUpdate: boolean }) {
           setLoaded(true);
         }
       })
-      .catch(() => {
-        if (active)
-          setMessage(
-            "Could not check for existing residents. Reload this page to try again.",
-          );
+      .catch((error: unknown) => {
+        if (active) setLookupError(error instanceof Error ? error.message : "Unable to check existing residents.");
       });
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [id, attempt]);
   async function search() {
     setBusy(true);
     setChecked(false);
@@ -279,7 +278,12 @@ function ReviewPanel({ id, isUpdate }: { id: string; isUpdate: boolean }) {
         Check the submitted details below, then choose where to save them. For
         updates, verify the requester using a contact method already on file.
       </p>
-      {!loaded && <p>Checking for existing residents…</p>}
+      {!loaded && !lookupError && <p role="status">Checking for existing residents…</p>}
+      {lookupError && <div role="alert">
+        <p>Could not check existing residents: {lookupError} Your submission has not been changed.</p>
+        <button type="button" onClick={() => { setLookupError(""); setAttempt((value) => value + 1); }}>Try again</button>
+        <p>If access is denied, sign out and sign back in with your administrator account.</p>
+      </div>}
       <label>
         Find an existing resident by name, address, or email
         <input value={query} onChange={(e) => setQuery(e.target.value)} />

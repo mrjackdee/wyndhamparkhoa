@@ -38,7 +38,14 @@ if (
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET ?? "",
   serverURL: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  csrf: [process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"],
+  // Explicit trusted origins: the public domain and the existing admin hostname.
+  // Never derive this allowlist from untrusted request headers.
+  csrf: Array.from(new Set([
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+    "https://www.wyndhamparkhoa.org",
+    "https://wyndhamparkhoa.org",
+    "https://wyndhamparkhoa.vercel.app",
+  ])),
   admin: {
     user: "users",
     meta: { titleSuffix: " | Wyndham Park HOA" },

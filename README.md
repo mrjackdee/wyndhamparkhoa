@@ -268,3 +268,10 @@ On **Residents**, use **Download formatted Excel list**. The `.xlsx` file has a 
 Resident tools now separate notification retries, user invitations, and duplicate merging into expandable sections. Duplicate merging uses resident search and named selections instead of manual IDs. Pending signup approval is performed on the individual submission, not by saving its notes.
 
 Verification: nine automated unit/workbook checks pass; seventeen isolated SQLite integration checks pass. `scripts/test-resident-review.ts` additionally exercises authenticated approval, repeat-approval rejection, missing-confirmation rejection, XLSX generation, and anonymous denial against a synthetic local database. Local SQLite transactions are enabled to test the same transaction-dependent flow as production PostgreSQL. Browser interaction with the owner's production login and opening the workbook in desktop Excel remain unverified.
+
+
+### Custom-domain administrator authentication
+
+The Payload CSRF allowlist explicitly includes https://www.wyndhamparkhoa.org, https://wyndhamparkhoa.org, https://wyndhamparkhoa.vercel.app and the configured NEXT_PUBLIC_SITE_URL. It is never derived from request headers. Custom admin actions still require same-origin requests and an active administrator. Submission duplicate-check failures display an error and a Try again button without approving or changing the submission. Existing pending submissions can use this workflow without resubmitting.
+
+The isolated resident-review regression script checks authenticated duplicate lookups on all three deployed hostnames, rejection of an untrusted origin, approval, repeat approval protection, and private Excel export. These tests use synthetic records in local SQLite, not live resident data.
