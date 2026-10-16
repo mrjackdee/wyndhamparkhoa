@@ -89,7 +89,7 @@ export default async function Layout({
               <Link href="/terms">Terms of Service</Link>
               <a href="https://www.DonOraGlobal.com">Site Developed by DonOra Global</a>
               <Link href="/admin">HOA administration</Link>
-              <a href="mailto:support@wyndhamparkhoa.org">Website issues or needs? support@wyndhamparkhoa.org</a>
+              <Link href="/website-feedback">Website issues or suggestions? Share your feedback</Link>
             </div>
           </div>
         </footer>
