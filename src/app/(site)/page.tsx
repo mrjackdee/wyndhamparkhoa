@@ -140,7 +140,7 @@ export default async function Home() {
       </section>
       <section className="wrap section two-col" aria-labelledby="feedback-heading">
         <div><p className="eyebrow">A WEBSITE FOR OUR COMMUNITY</p><h2 id="feedback-heading">Help us make it better.</h2></div>
-        <div><p>Found a website issue or have a suggestion? Share your feedback privately with the HOA board.</p><Link className="button secondary" href="/website-feedback">Share website feedback <span aria-hidden="true">→</span></Link></div>
+        <div><p>Found a website issue or have a suggestion? Share your feedback privately with the HOA board.</p><Link className="button secondary" href="/website-feedback">Share your feedback <span aria-hidden="true">→</span></Link></div>
       </section>
       {updates.length ? (
         <section className="wrap section">
