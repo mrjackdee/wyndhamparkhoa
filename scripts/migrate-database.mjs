@@ -27,6 +27,17 @@ try {
     FROM (SELECT resident_id, min(created_at) AS first_signup FROM wphoa.submissions
       WHERE resident_id IS NOT NULL AND request_type = 'new' AND status = 'reviewed'
       GROUP BY resident_id) s WHERE r.id = s.resident_id AND r.signed_up_at IS NULL`);
+  await query(`DO $$ BEGIN CREATE TYPE wphoa.enum_feedback_category AS ENUM ('issue','suggestion','other'); EXCEPTION WHEN duplicate_object THEN null; END $$`);
+  await query(`DO $$ BEGIN CREATE TYPE wphoa.enum_feedback_status AS ENUM ('new','reviewing','resolved'); EXCEPTION WHEN duplicate_object THEN null; END $$`);
+  await query(`DO $$ BEGIN CREATE TYPE wphoa.enum_feedback_notification AS ENUM ('pending','sent','failed'); EXCEPTION WHEN duplicate_object THEN null; END $$`);
+  await query(`CREATE TABLE IF NOT EXISTS wphoa.feedback (
+    id serial PRIMARY KEY, name varchar NOT NULL, email varchar NOT NULL,
+    category wphoa.enum_feedback_category NOT NULL, subject varchar NOT NULL, page_url varchar,
+    message varchar NOT NULL, status wphoa.enum_feedback_status NOT NULL DEFAULT 'new', notes varchar,
+    attachments jsonb, idempotency_key varchar NOT NULL UNIQUE, privacy_accepted_at timestamptz NOT NULL,
+    notification wphoa.enum_feedback_notification DEFAULT 'pending', notification_attempts numeric DEFAULT 0,
+    notification_last_attempt timestamptz, updated_at timestamptz NOT NULL DEFAULT now(), created_at timestamptz NOT NULL DEFAULT now())`);
+  await query('ALTER TABLE wphoa.payload_locked_documents_rels ADD COLUMN IF NOT EXISTS feedback_id integer REFERENCES wphoa.feedback(id) ON DELETE CASCADE');
   const check = await query("SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema='wphoa'");
   if (check.rows[0].count < 20) throw new Error('Schema verification failed.');
   await query('COMMIT');

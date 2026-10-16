@@ -1,3 +1,4 @@
+import { Feedback } from "./collections/feedback";
 import { buildConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { sqliteAdapter } from "@payloadcms/db-sqlite";
@@ -67,6 +68,7 @@ export default buildConfig({
         push: false,
       }),
   collections: [
+    Feedback,
     Users,
     Pages,
     News,

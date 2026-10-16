@@ -24,7 +24,7 @@ export default function Signup() {
         <aside className="note">
           <h2>Your information stays private.</h2>
           <p>
-            Only authorized HOA administrators can access resident records. Your
+            Only authorized HOA board members and administrators can access resident records. Your
             information will not appear on the public website.
           </p>
         </aside>

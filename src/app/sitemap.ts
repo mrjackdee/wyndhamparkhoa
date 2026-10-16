@@ -7,6 +7,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "",
     "/hoa-dues",
     "/resident-signup",
+    "/website-feedback",
     "/contact",
     "/resources",
     "/privacy",

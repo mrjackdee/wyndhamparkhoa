@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    feedback: Feedback;
     users: User;
     pages: Page;
     news: News;
@@ -84,6 +85,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    feedback: FeedbackSelect<false> | FeedbackSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     news: NewsSelect<false> | NewsSelect<true>;
@@ -136,6 +138,37 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feedback".
+ */
+export interface Feedback {
+  id: number;
+  name: string;
+  email: string;
+  category: 'issue' | 'suggestion' | 'other';
+  subject: string;
+  pageUrl?: string | null;
+  message: string;
+  status: 'new' | 'reviewing' | 'resolved';
+  notes?: string | null;
+  attachments?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  idempotencyKey: string;
+  privacyAcceptedAt: string;
+  notification?: ('pending' | 'sent' | 'failed') | null;
+  notificationAttempts?: number | null;
+  notificationLastAttempt?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -402,6 +435,10 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'feedback';
+        value: number | Feedback;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null)
@@ -482,6 +519,28 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feedback_select".
+ */
+export interface FeedbackSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  category?: T;
+  subject?: T;
+  pageUrl?: T;
+  message?: T;
+  status?: T;
+  notes?: T;
+  attachments?: T;
+  idempotencyKey?: T;
+  privacyAcceptedAt?: T;
+  notification?: T;
+  notificationAttempts?: T;
+  notificationLastAttempt?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
