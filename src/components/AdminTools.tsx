@@ -1,5 +1,7 @@
 "use client";
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useDocumentInfo } from "@payloadcms/ui";
 async function action(data: Record<string, unknown>) {
   const r = await fetch("/api/admin-tools", {
     method: "POST",
@@ -115,75 +117,227 @@ export function ResidentTools() {
     </section>
   );
 }
+type ResidentMatch = {
+  id: string | number;
+  name: string;
+  address: string;
+  email: string;
+};
+export function SubmissionReview() {
+  const { id, data } = useDocumentInfo();
+  if (!id) return null;
+  if (data?.status !== "pending")
+    return (
+      <p role="status">
+        This request is {String(data?.status ?? "saved")}.{" "}
+        <Link href="/admin/collections/residents">View resident records</Link>
+      </p>
+    );
+  return (
+    <ReviewPanel
+      key={String(id)}
+      id={String(id)}
+      isUpdate={data?.requestType === "update"}
+    />
+  );
+}
 export function ReviewTools() {
-  const [id, setID] = useState("");
-  const [residentID, setResidentID] = useState("");
-  const [message, setMessage] = useState("");
-  const [checked, setChecked] = useState(false);
-  async function run(type: string) {
-    try {
-      const r = await action({
-        action: type,
-        id,
-        residentID: residentID || undefined,
-        confirm: checked,
-      });
-      const data = await r.json();
-      setMessage(data.message ?? JSON.stringify(data.matches, null, 2));
-    } catch (e) {
-      setMessage(String(e));
-    }
-  }
   return (
     <section className="hoa-tools">
-      <h2>Review a registration or update</h2>
+      <h2>Review resident signups</h2>
       <p>
-        Open the submission to verify its details. Enter its ID below and check
-        for existing records. For an update, verify the requester through a
-        known contact method before approving. No public submission changes a
-        resident record automatically.
+        Choose a person from the list below. Their request opens with a review
+        panel where you can check for an existing resident and approve the
+        information.
       </p>
+      <p>
+        Pending requests need review. Reviewed requests have been added to
+        resident records. Saving internal notes does not approve a request.
+      </p>
+    </section>
+  );
+}
+function ReviewPanel({ id, isUpdate }: { id: string; isUpdate: boolean }) {
+  const [matches, setMatches] = useState<ResidentMatch[]>([]);
+  const [residentID, setResidentID] = useState("");
+  const [query, setQuery] = useState("");
+  const [checked, setChecked] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [approved, setApproved] = useState(false);
+  const [message, setMessage] = useState("");
+  useEffect(() => {
+    let active = true;
+    action({ action: "duplicates", id })
+      .then((r) => r.json())
+      .then((d) => {
+        if (active) {
+          setMatches(d.matches);
+          setLoaded(true);
+        }
+      })
+      .catch(() => {
+        if (active)
+          setMessage(
+            "Could not check for existing residents. Reload this page to try again.",
+          );
+      });
+    return () => {
+      active = false;
+    };
+  }, [id]);
+  async function search() {
+    setBusy(true);
+    setChecked(false);
+    setResidentID("");
+    setMessage("");
+    try {
+      const params = new URLSearchParams({ depth: "0", limit: "50" });
+      ["name", "address", "email"].forEach((field, i) =>
+        params.set(`where[or][${i}][${field}][contains]`, query.trim()),
+      );
+      const response = await fetch(`/api/residents?${params}`);
+      if (!response.ok) throw new Error("Search failed. Please try again.");
+      const result = await response.json();
+      setMatches(result.docs);
+      if (!result.docs.length) setMessage("No matching residents found.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Search failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function approve() {
+    if (busy || approved || !checked || !loaded) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const response = await action({
+        action: "review",
+        id,
+        residentID: residentID || undefined,
+        confirm: true,
+      });
+      const result = await response.json();
+      setApproved(true);
+      setMessage(result.message);
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Could not approve. Please try again.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+  if (approved)
+    return (
+      <section className="hoa-tools">
+        <h2>Request approved</h2>
+        <p role="status">{message}</p>
+        <Link href="/admin/collections/residents">View resident records</Link>
+        <p>
+          <Link href="/admin/collections/submissions">
+            Return to signup requests
+          </Link>
+        </p>
+      </section>
+    );
+  return (
+    <section className="hoa-tools" aria-busy={busy}>
+      <h2>{isUpdate ? "Review contact update" : "Review new signup"}</h2>
+      <p>
+        Check the submitted details below, then choose where to save them. For
+        updates, verify the requester using a contact method already on file.
+      </p>
+      {!loaded && <p>Checking for existing residents…</p>}
       <label>
-        Submission ID
-        <input
-          value={id}
-          onChange={(e) => {
-            setID(e.target.value);
-            setChecked(false);
-          }}
-        />
+        Find an existing resident by name, address, or email
+        <input value={query} onChange={(e) => setQuery(e.target.value)} />
       </label>
-      <button onClick={() => run("duplicates")}>
-        Find possible duplicates
+      <button
+        type="button"
+        disabled={busy || !loaded || !query.trim()}
+        onClick={search}
+      >
+        Search residents
       </button>
+      <fieldset disabled={busy || !loaded}>
+        <legend>Save this information to</legend>
+        {!isUpdate && (
+          <label>
+            <input
+              type="radio"
+              name="review-resident"
+              checked={!residentID}
+              onChange={() => {
+                setResidentID("");
+                setChecked(false);
+              }}
+              style={{ width: "auto", display: "inline" }}
+            />{" "}
+            A new resident record
+          </label>
+        )}
+        {matches.map((person) => (
+          <label key={person.id} style={{ display: "block", margin: "12px 0" }}>
+            <input
+              type="radio"
+              name="review-resident"
+              checked={residentID === String(person.id)}
+              onChange={() => {
+                setResidentID(String(person.id));
+                setChecked(false);
+              }}
+              style={{ width: "auto", display: "inline" }}
+            />{" "}
+            <strong>{person.name}</strong>
+            <br />
+            {person.address}
+            <br />
+            {person.email}
+          </label>
+        ))}
+        {loaded && !matches.length && (
+          <p>
+            No matching residents are shown.{" "}
+            {isUpdate
+              ? "Search for the resident before approving this update."
+              : "If this person is already registered, search above before creating another record."}
+          </p>
+        )}
+      </fieldset>
+      {residentID && (
+        <p>
+          <strong>
+            This replaces the selected resident’s contact details and
+            communication preferences with this submission.
+          </strong>
+        </p>
+      )}
       <label>
-        Existing resident ID, if matched
         <input
-          value={residentID}
-          onChange={(e) => {
-            setResidentID(e.target.value);
-            setChecked(false);
-          }}
-        />
-      </label>
-      <p>
-        Leaving resident ID blank creates a new record for a new registration.
-        Selecting an existing resident replaces that record’s contact details
-        with this request after your confirmation.
-      </p>
-      <label>
-        <input
-          style={{ width: "auto", display: "inline" }}
           type="checkbox"
           checked={checked}
+          disabled={busy || !loaded}
           onChange={(e) => setChecked(e.target.checked)}
+          style={{ width: "auto", display: "inline" }}
         />{" "}
-        I verified the request and the selected record.
+        I checked the submitted details and confirmed the correct resident.
       </label>
-      <button disabled={!checked || !id} onClick={() => run("review")}>
-        Approve reviewed request
+      <button
+        type="button"
+        disabled={busy || !loaded || !checked || (isUpdate && !residentID)}
+        onClick={approve}
+      >
+        {busy
+          ? "Working…"
+          : residentID
+            ? "Approve and update resident"
+            : "Approve and add resident"}
       </button>
-      <pre role="status">{message}</pre>
+      <p role="status">{message}</p>
     </section>
   );
 }
