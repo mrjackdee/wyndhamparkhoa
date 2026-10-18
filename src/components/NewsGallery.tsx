@@ -14,7 +14,7 @@ export function NewsGallery({ photos, preview = false, coverOnly = false }: {
     {items.map(({ photo, caption, id }, index) => {
       if (typeof photo !== "object" || !photo?.url) return null;
       return <figure key={id ?? photo.id} className={index === 0 ? "news-photo-lead" : undefined}>
-        <Image src={photo.url} alt={photo.alt!} width={photo.width ?? 1125}
+        <Image src={photo.url.replace(/^https:\/\/(?:wyndhamparkhoa\.vercel\.app|(?:www\.)?wyndhamparkhoa\.org)(?=\/api\/media\/)/, "")} alt={photo.alt!} width={photo.width ?? 1125}
           height={photo.height ?? 750} unoptimized
           sizes={coverOnly ? "(max-width: 760px) 100vw, 50vw" : "(max-width: 760px) 100vw, 900px"} />
         {caption ? <figcaption>{caption}</figcaption> : null}

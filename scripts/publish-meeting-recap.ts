@@ -58,3 +58,6 @@ try {
   await db.query("SELECT pg_advisory_unlock(18102026)");
   await db.end();
 }
+// Payload retains idle database handles; writes are complete and the migration lock is released.
+process.exit(0);
+
