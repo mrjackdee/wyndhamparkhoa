@@ -10,21 +10,23 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: {
-    default: "Wyndham Park HOA | Preview",
-    template: "Wyndham Park HOA | Preview",
+    default: "Wyndham Park HOA",
+    template: "%s | Wyndham Park HOA",
   },
-  description: "Preview the Wyndham Park Homeowners Association website, including resident resources, 2026 dues information, and HOA contacts.",
+  applicationName: "Wyndham Park HOA",
+  appleWebApp: { title: "Wyndham Park HOA" },
+  description: "Wyndham Park Homeowners Association news, resident resources, annual dues information, and HOA contacts.",
   openGraph: {
-    title: "Wyndham Park HOA | Preview",
-    description: "A draft preview of the Wyndham Park Homeowners Association website.",
-    siteName: "Wyndham Park HOA | Preview",
+    title: "Wyndham Park HOA",
+    description: "Wyndham Park Homeowners Association news, resident resources, annual dues information, and HOA contacts.",
+    siteName: "Wyndham Park HOA",
     type: "website",
     images: [{ url: "/wyndham-park-entrance.jpeg", width: 1125, height: 1151, alt: "Wyndham Park neighborhood entrance" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Wyndham Park HOA | Preview",
-    description: "A draft preview of the Wyndham Park Homeowners Association website.",
+    title: "Wyndham Park HOA",
+    description: "Wyndham Park Homeowners Association news, resident resources, annual dues information, and HOA contacts.",
     images: ["/wyndham-park-entrance.jpeg"],
   },
   robots: {
