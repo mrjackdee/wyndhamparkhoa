@@ -43,3 +43,15 @@ the selected media updates.
 
 Local checks use disposable SQLite databases and permitted local fixtures.
 Nothing in those test scripts connects to the production database.
+## Initial October 17 recap
+
+The production build runs a one-time owner-approved content import after a successful
+build. It updates the existing meeting record, preserves its URL, creation timestamp
+and event details, and uploads the three original photographs through the existing
+private Blob adapter. The owner explicitly approved retaining the source photographs
+in this public repository. No credentials or public write endpoints are added.
+
+A database migration marker prevents subsequent deployments from changing admin edits.
+The import refuses to overwrite a meeting changed since the reviewed invitation and
+reuses any already imported media when recovering from an interrupted attempt.
+All future stories and changes use the normal admin draft/preview/publish workflow.
