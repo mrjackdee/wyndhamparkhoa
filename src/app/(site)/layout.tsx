@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Inter } from "next/font/google";
@@ -8,7 +9,7 @@ import { FACEBOOK } from "@/lib/facts";
 import "./site.css";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Wyndham Park HOA",
     template: "%s | Wyndham Park HOA",

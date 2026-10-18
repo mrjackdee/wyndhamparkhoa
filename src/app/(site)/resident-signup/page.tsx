@@ -1,9 +1,6 @@
+import { pageMetadata } from "@/lib/seo";
 import SignupForm from "@/components/SignupForm";
-export const metadata = {
-  title: "Resident Signup",
-  description:
-    "Register or update your Wyndham Park resident contact information and communication preferences.",
-};
+export const metadata = pageMetadata("Resident Signup", "Register or update your Wyndham Park resident contact information and communication preferences.", "/resident-signup");
 export default function Signup() {
   return (
     <div className="wrap section signup-page">

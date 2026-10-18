@@ -1,11 +1,8 @@
+import { pageMetadata } from "@/lib/seo";
 import { dues } from "@/lib/content";
 import { Contacts, Prose } from "@/components/Content";
 import CopyEmail from "@/components/CopyEmail";
-export const metadata = {
-  title: "HOA Dues",
-  description:
-    "Published annual dues information and existing payment methods for Wyndham Park Homeowners Association.",
-};
+export const metadata = pageMetadata("HOA Dues", "Published annual dues information and existing payment methods for Wyndham Park Homeowners Association.", "/hoa-dues");
 export default async function Dues() {
   const records = await dues();
   const year = new Date().getFullYear();

@@ -1,9 +1,6 @@
+import { pageMetadata } from "@/lib/seo";
 import FeedbackForm from "@/components/FeedbackForm";
-export const metadata = {
-  title: "Website Feedback",
-  description:
-    "Share a website issue or suggest an improvement to the Wyndham Park HOA website.",
-};
+export const metadata = pageMetadata("Website Feedback", "Share a website issue or suggest an improvement to the Wyndham Park HOA website.", "/website-feedback");
 export default function Page() {
   return (
     <div className="wrap section signup-page">

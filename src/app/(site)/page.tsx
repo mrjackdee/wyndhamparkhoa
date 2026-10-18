@@ -1,3 +1,6 @@
+import { pageMetadata, SITE_NAME, SITE_DESCRIPTION, SITE_URL, organization } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
+export const metadata = { ...pageMetadata(SITE_NAME, SITE_DESCRIPTION, "/"), title: { absolute: SITE_NAME } };
 import Link from "next/link";
 import Image from "next/image";
 import { NewsGallery } from "@/components/NewsGallery";
@@ -23,6 +26,7 @@ export default async function Home() {
         };
   return (
     <>
+      <JsonLd data={{ "@context": "https://schema.org", "@graph": [organization, { "@type": "WebSite", "@id": `${SITE_URL}/#website`, url: SITE_URL, name: SITE_NAME, description: SITE_DESCRIPTION, publisher: { "@id": organization["@id"] }, inLanguage: "en-US" }] }} />
       <section className={"hero " + (hero ? "has-photo" : "text-hero")}>
         <div className="hero-copy">
           <p className="eyebrow">WYNDHAM PARK HOMEOWNERS ASSOCIATION</p>

@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 const roleEmails: Record<string, string> = {
   "President": "president", "Vice president": "vicepresident",
   "Secretary": "secretary", "Treasurer": "treasurer",
@@ -11,7 +12,7 @@ function roleEmail(role: string) {
  return key ? roleEmails[key] + "@wyndhamparkhoa.org" : undefined;
 }
 import { settings } from "@/lib/content";
-export const metadata = { title: "HOA & Leadership", description: "Wyndham Park HOA board members and standing committees." };
+export const metadata = pageMetadata("HOA & Leadership", "Wyndham Park HOA board members and standing committees.", "/hoa-and-leadership");
 export default async function Leadership() {
  const site = await settings();
  return <div className="wrap section"><p className="eyebrow">YOUR ASSOCIATION</p><h1>HOA & leadership.</h1><p className="lead narrow">Board members and standing committee chairpersons of Wyndham Park Homeowners Association.</p>

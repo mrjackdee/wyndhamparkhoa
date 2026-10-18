@@ -1,3 +1,4 @@
+import { canonicalUrl } from "@/lib/seo";
 import type { MetadataRoute } from "next";
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -9,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
             disallow: ["/admin", "/api", "/preview"],
           }
         : { userAgent: "*", disallow: "/" },
-    sitemap: process.env.NEXT_PUBLIC_SITE_URL + "/sitemap.xml",
+    sitemap: canonicalUrl("/sitemap.xml"),
   };
 }

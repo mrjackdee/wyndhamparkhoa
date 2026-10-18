@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { pages, settings, cms, news } from "@/lib/content";
@@ -16,12 +17,13 @@ export async function generateMetadata({
     privacy: "Privacy Notice",
     news: "News and Events",
   };
-  return {
-    title: page?.title ?? names[slug] ?? "Page not found",
-    description:
-      page?.summary ??
-      "Wyndham Park Homeowners Association resident information.",
+  const descriptions: Record<string, string> = {
+    contact: "Contact Wyndham Park HOA representatives with questions about the association, dues, or resident information.",
+    resources: "Find Wyndham Park resident resources, public documents, annual dues information, contact updates, and answers to common questions.",
+    news: "Community news, meeting recaps, photos, and event notices from Wyndham Park Homeowners Association.",
   };
+  return pageMetadata(page?.title ?? names[slug] ?? "Page not found",
+    page?.summary ?? descriptions[slug] ?? "Wyndham Park Homeowners Association resident information.", "/" + slug);
 }
 export default async function Page({
   params,
