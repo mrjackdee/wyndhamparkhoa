@@ -15,7 +15,7 @@ try {
       data: { title: "October 17 meeting photo " + (i + 1), alt: descriptions[i], category: "photo",
         source: "Owner-provided October 17, 2026 community meeting photograph, supplied via DonOra Drive.",
         visibility: "public" } });
-    photos.push({ photo: photo.id, caption: descriptions[i] });
+    photos.push({ photo: photo.id, caption: i === 0 ? "" : descriptions[i] });
   }
   const story = await p.create({ collection: "news", data: {
     title: "October 17 Community Meeting Recap", slug: "meeting",

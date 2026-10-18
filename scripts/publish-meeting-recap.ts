@@ -38,7 +38,7 @@ try {
         filePath: `assets/meeting-2026-10-17/${filename}`,
         data: { title: "October 17 meeting — " + filename.replace(".jpeg", "").replaceAll("-", " "),
           alt, source: photoSource, category: "photo", visibility: "public" } });
-      photos.push({ photo: photo.id, caption: alt });
+      photos.push({ photo: photo.id, caption: filename === "officer-speaking.jpeg" ? "" : alt });
     }
     if (meeting.source !== source) await payload.update({ collection: "news", id: meeting.id, data: {
       title: "October 17 Community Meeting Recap",
@@ -53,6 +53,18 @@ try {
     await db.query("INSERT INTO wphoa.payload_migrations (name, batch) VALUES ($1, 1)", [marker]);
     console.log("Owner-approved recap published on existing meeting record with three original photos.");
   } else console.log("Meeting recap already imported; preserving subsequent admin edits.");
+  // Owner requested removing this visible caption; retain the Media accessibility alt.
+  payload ??= await getPayload({ config });
+  const current = await payload.find({ collection: "news", where: { slug: { equals: "meeting" } }, depth: 0, limit: 1 });
+  const story = current.docs[0];
+  const removedCaption = "A uniformed officer speaking to neighbors seated under a covered patio.";
+  if (story?.photos?.some((row) => row.caption === removedCaption)) {
+    await payload.update({ collection: "news", id: story.id, data: {
+      photos: story.photos.map((row) => ({ ...row, caption: row.caption === removedCaption ? "" : row.caption })),
+      _status: story._status,
+    } });
+    console.log("Requested meeting caption removed; accessibility alt and other captions preserved.");
+  }
 } finally {
   if (payload) await payload.destroy();
   await db.query("SELECT pg_advisory_unlock(18102026)");
