@@ -228,6 +228,8 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Add photos and captions, save a draft, open Preview, then Publish changes. The first photo is the cover; drag rows to reorder. Publishing approved photos makes them public.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "news".
  */
@@ -244,22 +246,84 @@ export interface News {
    */
   body: string;
   /**
-   * Record the source and its year. Never publish unverified neighborhood claims.
+   * For example: HOA meeting, October 17, 2026; caption supplied by DKPD.
    */
   source: string;
   /**
    * Archived content is removed from public pages. Previous versions remain available.
    */
   archived?: boolean | null;
+  /**
+   * Add a photo, then enter its caption. Move a row to the top to use it as the cover. Keep new uploads private until this story is published.
+   */
+  photos?:
+    | {
+        photo: number | Media;
+        /**
+         * Optional text shown beneath this photo. Describe the scene without identifying attendees.
+         */
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Required before publishing photos. Draft uploads stay private; Publish changes makes the selected photos publicly accessible.
+   */
+  photosApproved?: boolean | null;
+  /**
+   * Show this story above the other news and event rows.
+   */
+  featured?: boolean | null;
+  linkLabel?: string | null;
   kind: 'announcement' | 'event';
   eventDate?: string | null;
   endDate?: string | null;
+  /**
+   * Defaults to local Eastern time. Usually no change is needed.
+   */
   timezone?: string | null;
   location?: string | null;
   cancelled?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Uploads are private until explicitly marked public. Publish only approved public documents and photos.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  /**
+   * A name is filled in for you. Change it if helpful.
+   */
+  title: string;
+  /**
+   * Briefly describe what is visible. Do not identify attendees.
+   */
+  alt?: string | null;
+  /**
+   * Leave private for a news draft. Publishing an approved story makes its selected photos public.
+   */
+  visibility: 'private' | 'public';
+  category: 'photo' | 'document';
+  /**
+   * Who supplied it and when? For example: HOA meeting photos supplied by the board, October 2026.
+   */
+  source: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -290,34 +354,6 @@ export interface Due {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * Uploads are private until explicitly marked public. Publish only approved public documents and photos.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  title: string;
-  alt?: string | null;
-  visibility: 'private' | 'public';
-  category: 'photo' | 'document';
-  /**
-   * Record the source and its year. Never publish unverified neighborhood claims.
-   */
-  source: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -594,6 +630,16 @@ export interface NewsSelect<T extends boolean = true> {
   body?: T;
   source?: T;
   archived?: T;
+  photos?:
+    | T
+    | {
+        photo?: T;
+        caption?: T;
+        id?: T;
+      };
+  photosApproved?: T;
+  featured?: T;
+  linkLabel?: T;
   kind?: T;
   eventDate?: T;
   endDate?: T;

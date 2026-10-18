@@ -4,6 +4,9 @@ import { createLocalReq } from "payload";
 import { cms } from "@/lib/content";
 import { role } from "@/lib/access";
 import { Prose } from "@/components/Content";
+import { NewsArticle } from "@/components/NewsArticle";
+import type { News } from "@/payload-types";
+export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Private preview",
   robots: { index: false, follow: false },
@@ -25,15 +28,18 @@ export default async function Preview({
     draft: true,
     overrideAccess: false,
     req,
+    depth: 1,
   });
   return (
     <div className="wrap section">
       <p className="notice">
         Private draft preview. This content is not necessarily published.
       </p>
+      {collection === "news" ? <NewsArticle story={doc as News} preview /> : <>
       <h1>{doc.title}</h1>
       <p className="lead">{doc.summary}</p>
       <Prose text={doc.body} />
+      </>}
     </div>
   );
 }

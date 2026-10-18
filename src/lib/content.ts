@@ -40,7 +40,7 @@ export const news = cache(async () => {
     await p.find({
       collection: "news",
       overrideAccess: false,
-      depth: 0,
+      depth: 1,
       limit: 100,
       sort: "-createdAt",
     })

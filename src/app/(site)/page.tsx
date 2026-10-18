@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { NewsGallery } from "@/components/NewsGallery";
 import { settings, dues, news } from "@/lib/content";
 export default async function Home() {
   const [site, records, updates] = await Promise.all([
@@ -9,6 +10,8 @@ export default async function Home() {
   ]);
   const year = new Date().getFullYear();
   const current = records.find((d) => d.year === year);
+  const featured = updates.find((n) => n.featured && !n.cancelled);
+  const otherUpdates = updates.filter((n) => n.id !== featured?.id);
   const hero =
     site.hero &&
     typeof site.hero === "object" &&
@@ -145,9 +148,21 @@ export default async function Home() {
       {updates.length ? (
         <section className="wrap section">
           <p className="eyebrow">FROM THE ASSOCIATION</p>
-          <h2>Community Events.</h2>
+          <h2>Community News &amp; Events.</h2>
+          {featured ? <article className="news-feature">
+            <NewsGallery photos={featured.photos} coverOnly />
+            <div>
+              <p className="eyebrow">COMMUNITY NEWS</p>
+              <h3>{featured.title}</h3>
+              {featured.eventDate ? <time dateTime={featured.eventDate}>{new Intl.DateTimeFormat("en-US", {
+                dateStyle: "long", timeZone: featured.timezone ?? "America/New_York",
+              }).format(new Date(featured.eventDate))}</time> : null}
+              <p>{featured.summary}</p>
+              <Link className="button" href={"/news/" + featured.slug}>{featured.linkLabel || "Read the story & view photos"}</Link>
+            </div>
+          </article> : null}
           <div className="news-list">
-            {updates.slice(0, 3).map((n) => (
+            {otherUpdates.slice(0, 3).map((n) => (
               <Link key={n.id} href={"/news/" + n.slug}>
                 <span>{n.kind === "event" ? "EVENT" : "ANNOUNCEMENT"}</span>
                 <h3>{n.title}</h3>

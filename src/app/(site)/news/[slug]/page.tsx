@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { news } from "@/lib/content";
-import { Prose } from "@/components/Content";
+import { NewsArticle } from "@/components/NewsArticle";
 export async function generateMetadata({
   params,
 }: {
@@ -18,25 +18,5 @@ export default async function Page({
   const { slug } = await params;
   const n = (await news()).find((n) => n.slug === slug);
   if (!n) notFound();
-  return (
-    <article className="wrap section narrow">
-      <p className="eyebrow">
-        {n.cancelled ? "CANCELLED" : n.kind.toUpperCase()}
-      </p>
-      <h1>{n.title}</h1>
-      <p className="lead">{n.summary}</p>
-      {n.eventDate ? (
-        <p>
-          {new Intl.DateTimeFormat("en-US", {
-            dateStyle: "full",
-            timeStyle: "short",
-            timeZone: n.timezone ?? "America/New_York",
-          }).format(new Date(n.eventDate))}{" "}
-          ({n.timezone})<br />
-          {n.location}
-        </p>
-      ) : null}
-      <Prose text={n.body} />
-    </article>
-  );
+  return <NewsArticle story={n} />;
 }

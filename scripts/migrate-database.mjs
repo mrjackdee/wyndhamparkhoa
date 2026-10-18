@@ -18,6 +18,25 @@ try {
     await query('INSERT INTO wphoa.payload_migrations (name, batch) VALUES ($1, $2)', ['20261013_232308', 1]);
   }
   await query('ALTER TABLE wphoa.media ADD COLUMN IF NOT EXISTS prefix varchar, ADD COLUMN IF NOT EXISTS _objectkey varchar');
+  for (const [table, prefix] of [['news', ''], ['_news_v', 'version_']]) {
+    await query(`ALTER TABLE wphoa.${table}
+      ADD COLUMN IF NOT EXISTS ${prefix}featured boolean DEFAULT false,
+      ADD COLUMN IF NOT EXISTS ${prefix}photos_approved boolean DEFAULT false,
+      ADD COLUMN IF NOT EXISTS ${prefix}link_label varchar DEFAULT 'Read the story & view photos'`);
+  }
+  await query(`CREATE TABLE IF NOT EXISTS wphoa.news_photos (
+    _order integer NOT NULL, _parent_id integer NOT NULL REFERENCES wphoa.news(id) ON DELETE CASCADE,
+    id varchar PRIMARY KEY NOT NULL, photo_id integer REFERENCES wphoa.media(id) ON DELETE SET NULL, caption varchar)`);
+  await query(`CREATE TABLE IF NOT EXISTS wphoa._news_v_version_photos (
+    _order integer NOT NULL, _parent_id integer NOT NULL REFERENCES wphoa._news_v(id) ON DELETE CASCADE,
+    id serial PRIMARY KEY NOT NULL, photo_id integer REFERENCES wphoa.media(id) ON DELETE SET NULL,
+    caption varchar, _uuid varchar)`);
+  for (const table of ['news_photos', '_news_v_version_photos']) {
+    await query(`CREATE INDEX IF NOT EXISTS ${table}_order_idx ON wphoa.${table} (_order)`);
+    await query(`CREATE INDEX IF NOT EXISTS ${table}_parent_id_idx ON wphoa.${table} (_parent_id)`);
+    await query(`CREATE INDEX IF NOT EXISTS ${table}_photo_idx ON wphoa.${table} (photo_id)`);
+    await query(`ALTER TABLE wphoa.${table} ENABLE ROW LEVEL SECURITY`);
+  }
   for (const table of ['site_settings_leadership', '_site_settings_v_version_leadership']) {
     await query(`ALTER TABLE wphoa.${table} ADD COLUMN IF NOT EXISTS "group" varchar DEFAULT 'Board Members', ALTER COLUMN phone DROP NOT NULL`);
   }

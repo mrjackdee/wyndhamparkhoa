@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { ValidationError } from "payload";
 import type {
   CollectionConfig,
   CollectionAfterChangeHook,
@@ -234,14 +235,39 @@ export const News: CollectionConfig = {
   labels: { singular: "Announcement or event", plural: "News and events" },
   admin: {
     useAsTitle: "title",
+    defaultColumns: ["title", "_status", "featured", "eventDate"],
     group: "Website",
+    description: "Add photos and captions, save a draft, open Preview, then Publish changes. The first photo is the cover; drag rows to reorder. Publishing approved photos makes them public.",
     preview: (doc) =>
-      `${process.env.NEXT_PUBLIC_SITE_URL}/preview/news/${doc.id}`,
+      `/preview/news/${doc.id}`,
   },
   access: managed,
   versions,
   fields: [
-    ...common,
+    ...common.map((field): Field => {
+      if (field.type === "text" && field.name === "slug") return { ...field, admin: { ...field.admin, hidden: true } };
+      if (field.type === "textarea" && field.name === "source") return { ...field, label: "Where did this news come from?", admin: { description: "For example: HOA meeting, October 17, 2026; caption supplied by DKPD." } };
+      return field;
+    }),
+    {
+      name: "photos", type: "array", label: "Photos and captions",
+      labels: { singular: "Photo", plural: "Photos" }, maxRows: 20,
+      admin: { description: "Add a photo, then enter its caption. Move a row to the top to use it as the cover. Keep new uploads private until this story is published." },
+      fields: [
+        { name: "photo", label: "Photo", type: "upload", relationTo: "media", required: true,
+          filterOptions: { category: { equals: "photo" } } },
+        { name: "caption", label: "Caption", type: "textarea",
+          admin: { description: "Optional text shown beneath this photo. Describe the scene without identifying attendees." } },
+      ],
+    },
+    { name: "photosApproved", label: "These photos are approved for the public website",
+      type: "checkbox", defaultValue: false,
+      admin: { description: "Required before publishing photos. Draft uploads stay private; Publish changes makes the selected photos publicly accessible.",
+        condition: (data) => Boolean(data.photos?.length) } },
+    { name: "featured", label: "Feature on homepage", type: "checkbox", defaultValue: false,
+      admin: { position: "sidebar", description: "Show this story above the other news and event rows." } },
+    { name: "linkLabel", label: "Homepage button text", type: "text", defaultValue: "Read the story & view photos",
+      admin: { condition: (data) => Boolean(data.featured) } },
     {
       name: "kind",
       type: "select",
@@ -259,13 +285,17 @@ export const News: CollectionConfig = {
       type: "date",
       admin: { date: { pickerAppearance: "dayAndTime" } },
     },
-    { name: "timezone", type: "text", defaultValue: "America/New_York" },
+    { name: "timezone", label: "Event timezone", type: "text", defaultValue: "America/New_York",
+      admin: { position: "sidebar", description: "Defaults to local Eastern time. Usually no change is needed." } },
     { name: "location", type: "text" },
     { name: "cancelled", type: "checkbox", defaultValue: false },
   ],
   hooks: {
     beforeValidate: [
-      ({ data }) => {
+      ({ data, originalDoc }) => {
+        if (data && !data.slug) data.slug = originalDoc?.slug || String(data.title ?? "")
+          .toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
         if (data?.kind === "event" && (!data.eventDate || !data.location))
           throw new Error("Events need a date, time, and location.");
         if (data?.timezone) {
@@ -274,6 +304,26 @@ export const News: CollectionConfig = {
           } catch {
             throw new Error("Enter an IANA timezone such as America/New_York.");
           }
+        }
+        return data;
+      },
+    ],
+    beforeChange: [
+      async ({ data, originalDoc, req }) => {
+        if (data._status !== "published") return data;
+        const photos = data.photos ?? originalDoc?.photos ?? [];
+        if (photos.length && !(data.photosApproved ?? originalDoc?.photosApproved))
+          throw new ValidationError({ errors: [{ path: "photosApproved",
+            message: "Confirm that these photos are approved for the public website before publishing." }] });
+        for (const row of photos) {
+          const photo = await req.payload.findByID({ collection: "media",
+            id: typeof row.photo === "object" ? row.photo.id : row.photo,
+            overrideAccess: false, req });
+          if (photo.category !== "photo" || !photo.mimeType?.startsWith("image/") || !photo.alt?.trim() || !photo.source?.trim())
+            throw new ValidationError({ errors: [{ path: "photos",
+              message: "Each photo needs an image, a description for accessibility, and its source." }] });
+          if (photo.visibility !== "public") await req.payload.update({ collection: "media", id: photo.id,
+            data: { visibility: "public" }, overrideAccess: false, req });
         }
         return data;
       },
@@ -327,26 +377,33 @@ export const Media: CollectionConfig = {
     disableLocalStorage: Boolean(process.env.S3_BUCKET),
   },
   fields: [
-    text("title", true),
-    text("alt"),
+    { name: "title", type: "text", label: "Photo or document name", required: true, defaultValue: "Community photo",
+      admin: { description: "A name is filled in for you. Change it if helpful." } },
+    { name: "alt", type: "text", label: "Describe the photo for accessibility",
+      admin: { description: "Briefly describe what is visible. Do not identify attendees." } },
     {
       name: "visibility",
       type: "select",
       defaultValue: "private",
       required: true,
       options: ["private", "public"],
+      admin: { position: "sidebar", description: "Leave private for a news draft. Publishing an approved story makes its selected photos public." },
     },
     {
       name: "category",
       type: "select",
       required: true,
       options: ["photo", "document"],
+      defaultValue: "photo",
+      admin: { position: "sidebar" },
     },
-    provenance,
+    { ...provenance, label: "Photo or document source",
+      admin: { description: "Who supplied it and when? For example: HOA meeting photos supplied by the board, October 2026." } } as Field,
   ],
   hooks: {
     beforeValidate: [
       ({ req, data }) => {
+        if (data && !data.title?.trim() && req.file) data.title = req.file.name;
         if (req.file) {
           if (req.file.size > 3 * 1024 * 1024)
             throw new Error("Maximum file size is 3 MB.");
@@ -375,7 +432,7 @@ export const Media: CollectionConfig = {
             }[req.file.mimetype] ?? "bin");
         }
         if (data?.category === "photo" && !data.alt)
-          throw new Error("Add descriptive alternative text.");
+          throw new ValidationError({ errors: [{ path: "alt", message: "Add a brief description of the photo for accessibility." }] });
         return data;
       },
     ],
