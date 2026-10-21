@@ -993,3 +993,7 @@ h1 em { font-weight: 600; }
 .news-gallery { align-items: start; }
 .news-gallery figure { padding: 10px; border: 1px solid var(--line); background: var(--white); box-shadow: 0 2px 8px #24382e0a; }
 .news-gallery img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: contain; background: #eeeadd; border-radius: 0; }
+
+.news-article:has(+ .recap-recognition) { padding-bottom: 32px; }
+.news-article:has(+ .recap-recognition) .prose > p:last-child { margin-bottom: 0; }
+.recap-recognition { padding-top: 0; }

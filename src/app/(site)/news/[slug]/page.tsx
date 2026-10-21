@@ -43,6 +43,6 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     ] }] }} />
     <div className="wrap narrow"><p><Link href="/">Home</Link> / <Link href="/news">News &amp; Events</Link> / {story.title}</p></div>
     <NewsArticle story={story} />
-    {recognition.length ? <aside className="wrap section narrow"><p className="eyebrow">COMMUNITY SPOTLIGHT</p><h2>Recognizing our neighbors and partners</h2>{recognition.map(item => <p key={item.id}><Link className="text-link" href={`/spotlight/${item.id}`}>{item.title} →</Link></p>)}</aside> : null}
+    {recognition.length ? <aside className="wrap section narrow recap-recognition"><p className="eyebrow">COMMUNITY SPOTLIGHT</p><h2>Recognizing our neighbors and partners</h2>{recognition.map(item => <p key={item.id}><Link className="text-link" href={`/spotlight/${item.id}`}>{item.title} →</Link></p>)}</aside> : null}
   </>;
 }

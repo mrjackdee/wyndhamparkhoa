@@ -3,7 +3,7 @@ import { Prose } from "./Content";
 import { NewsGallery } from "./NewsGallery";
 
 export function NewsArticle({ story, preview = false }: { story: News; preview?: boolean }) {
-  return <article className="wrap section narrow">
+  return <article className="wrap section narrow news-article">
     <p className="eyebrow">{story.cancelled ? "CANCELLED" : story.kind.toUpperCase()}</p>
     <h1>{story.title}</h1>
     <p className="lead">{story.summary}</p>
