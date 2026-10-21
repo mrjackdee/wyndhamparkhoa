@@ -32,13 +32,15 @@ try {
       const existing = await p.find({ collection: "media", where: { source: { equals: source } }, limit: 2 });
       if (existing.docs.length > 1) throw new Error("Duplicate media import; review required.");
       const photo = existing.docs[0] ?? await p.create({ collection: "media", filePath: "assets/meeting-2026-10-17-additions/" + filename,
-        data: { title: "October 17 meeting: " + filename, alt, source, category: "photo", visibility: "private" } });
+        data: { title: "October 17 meeting: " + filename, alt, source, category: "photo", visibility: "public" } });
+      if (photo.visibility !== "public") await p.update({ collection: "media", id: photo.id, data: { visibility: "public" } });
       if (!photos.some(row => row.photo === photo.id)) photos.push({ photo: photo.id, caption: "" });
     }
     const videoSource = `Owner-approved video from Drive file 1x3kBPOpNDwhx6SIf0l1q_e0oOmZzSvxg. Audio track removed; H.264 video preserved; ${marker}.`;
     const oldVideo = await p.find({ collection: "media", where: { source: { equals: videoSource } }, limit: 1 });
     const video = oldVideo.docs[0] ?? await p.create({ collection: "media", filePath: "assets/meeting-2026-10-17-additions/community-meeting-silent.mp4",
-      data: { title: "Community gathering thank-you video (no audio)", source: videoSource, category: "video", visibility: "private" } });
+      data: { title: "Community gathering thank-you video (no audio)", source: videoSource, category: "video", visibility: "public" } });
+    if (video.visibility !== "public") await p.update({ collection: "media", id: video.id, data: { visibility: "public" } });
     await p.update({ collection: "news", id: story.id, data: { photos, photosApproved: true, video: video.id, videoApproved: true,
       videoDescription: "A silent Wyndham Park Fall Festival thank-you presentation celebrating neighbors coming together for food, shared meals, music, and conversation. It thanks the neighbors who planned the gathering and prepared food, thanks everyone who participated, and closes with: Together is what makes Wyndham Park a community. Looking forward to our next gathering!",
       _status: "published" } });
