@@ -345,3 +345,9 @@ The owner approved seven additional photographs and the Drive MP4 on October 21.
 News records now support an optional silent MP4, approval checkbox, and accessible text description. Staff use the existing Media uploader (maximum 3 MB); MP4 files must already have audio removed. A bounded ISO-BMFF parser rejects audio tracks, missing video tracks, malformed box lengths and incorrect signatures. The website does not claim to strip audio during admin upload. Newly uploaded files remain private until an approved story is published. The player uses native controls, plays inline, does not autoplay, and includes a visible no-audio notice plus a selectable text equivalent.
 
 `scripts/publish-meeting-additions.ts` appends the seven photos and silent video to the existing `meeting` recap only once, preserving previous photos, body, original creation date, and subsequent board edits. It refuses to publish over an unpublished draft. The schema change adds optional video relationships and approval/description fields to News and News versions, plus the Media video category. No original audio file is committed or published.
+
+### Recognition carousel and homepage order
+
+Community Spotlight displays one recognition card at a time, with Previous and Next buttons, a position counter, keyboard arrow controls, and polite screen-reader announcements. It does not advance automatically. Cards reserve the height of the longest entry to avoid page jumps, and inactive cards are excluded from accessibility and interaction. Board Members and Administrators continue to manage the entries and their order through Community Spotlight, with no code changes. Existing grouped recognition remains grouped as supplied.
+
+Homepage order: entrance hero, featured Community Spotlight, Community News & Events, Facebook, dues, resident contact registration, and feedback. News retains the existing featured recap, photo, summary, and full-story link.

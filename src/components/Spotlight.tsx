@@ -1,3 +1,4 @@
+import { RecognitionCarousel } from "./RecognitionCarousel";
 import Link from "next/link";
 import Image from "next/image";
 import type { Spotlight as SpotlightRecord } from "@/payload-types";
@@ -15,7 +16,7 @@ export function Spotlight({ item, preview = false, homepage = false }: {
         <p className="lead">{item.introduction}</p>
         {item.meetingDate ? <p className="spotlight-date">Recognizing our <time dateTime={item.meetingDate}>{new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeZone: "UTC" }).format(new Date(item.meetingDate))}</time> gathering</p> : null}
       </header>
-      <div className="recognitions">
+      <RecognitionCarousel>
         {(item.recognitions ?? []).map((entry, index) => {
           const photo = typeof entry.photo === "object" && entry.photo?.url && entry.photo.mimeType?.startsWith("image/") && (preview || entry.photo.visibility === "public") ? entry.photo : null;
           return <article className="recognition" key={entry.id ?? index}>
@@ -23,7 +24,7 @@ export function Spotlight({ item, preview = false, homepage = false }: {
             <div><h3>{entry.name}</h3><p className="recognition-role">{entry.role}</p><p className="recognition-message">{entry.message}</p></div>
           </article>;
         })}
-      </div>
+      </RecognitionCarousel>
       <div className="actions spotlight-actions">
         {recap ? <Link className="button" href={`/news/${recap.slug}`}>{item.recapLabel || "Read the meeting recap"}<span aria-hidden="true">→</span></Link> : null}
         <Link className="text-link" href="/spotlight">Browse community recognition <span aria-hidden="true">→</span></Link>

@@ -68,6 +68,34 @@ export default async function Home() {
         </div>
       </section>
       {recognition.find(s => s.featured && !s.archived) ? <Spotlight item={recognition.find(s => s.featured && !s.archived)!} homepage /> : null}
+      {updates.length ? (
+        <section className="wrap section">
+          <p className="eyebrow">FROM THE ASSOCIATION</p>
+          <h2>Community News &amp; Events.</h2>
+          {featured ? <article className="news-feature">
+            <NewsGallery photos={featured.photos} coverOnly />
+            <div>
+              <p className="eyebrow">COMMUNITY NEWS</p>
+              <h3>{featured.title}</h3>
+              {featured.eventDate ? <time dateTime={featured.eventDate}>{new Intl.DateTimeFormat("en-US", {
+                dateStyle: "long", timeZone: featured.timezone ?? "America/New_York",
+              }).format(new Date(featured.eventDate))}</time> : null}
+              <p>{featured.summary}</p>
+              <Link className="button" href={"/news/" + featured.slug}>{featured.linkLabel || "Read the story & view photos"}</Link>
+            </div>
+          </article> : null}
+          <div className="news-list">
+            {otherUpdates.slice(0, 3).map((n) => (
+              <Link key={n.id} href={"/news/" + n.slug}>
+                <span>{n.kind === "event" ? "EVENT" : "ANNOUNCEMENT"}</span>
+                <h3>{n.title}</h3>
+                <p>{n.summary}</p>
+                <span aria-hidden="true">↗</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
       <section aria-labelledby="facebook-heading" style={{ background: "#e6eadf", borderTop: "1px solid #d4daca", borderBottom: "1px solid #d4daca" }}>
         <div className="wrap" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "24px 40px", paddingTop: 32, paddingBottom: 32 }}>
           <div style={{ flex: "1 1 260px" }}>
@@ -152,34 +180,7 @@ export default async function Home() {
         <div><p className="eyebrow">A WEBSITE FOR OUR COMMUNITY</p><h2 id="feedback-heading">Help us make it better.</h2></div>
         <div><p>Found a website issue or have a suggestion? Share your feedback privately with the HOA board.</p><Link className="button secondary" href="/website-feedback">Share your feedback <span aria-hidden="true">→</span></Link></div>
       </section>
-      {updates.length ? (
-        <section className="wrap section">
-          <p className="eyebrow">FROM THE ASSOCIATION</p>
-          <h2>Community News &amp; Events.</h2>
-          {featured ? <article className="news-feature">
-            <NewsGallery photos={featured.photos} coverOnly />
-            <div>
-              <p className="eyebrow">COMMUNITY NEWS</p>
-              <h3>{featured.title}</h3>
-              {featured.eventDate ? <time dateTime={featured.eventDate}>{new Intl.DateTimeFormat("en-US", {
-                dateStyle: "long", timeZone: featured.timezone ?? "America/New_York",
-              }).format(new Date(featured.eventDate))}</time> : null}
-              <p>{featured.summary}</p>
-              <Link className="button" href={"/news/" + featured.slug}>{featured.linkLabel || "Read the story & view photos"}</Link>
-            </div>
-          </article> : null}
-          <div className="news-list">
-            {otherUpdates.slice(0, 3).map((n) => (
-              <Link key={n.id} href={"/news/" + n.slug}>
-                <span>{n.kind === "event" ? "EVENT" : "ANNOUNCEMENT"}</span>
-                <h3>{n.title}</h3>
-                <p>{n.summary}</p>
-                <span aria-hidden="true">↗</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
+
     </>
   );
 }
