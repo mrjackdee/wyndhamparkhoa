@@ -348,7 +348,7 @@ News records now support an optional silent MP4, approval checkbox, and accessib
 
 ### Recognition carousel and homepage order
 
-Community Spotlight displays one recognition card at a time, with Previous and Next buttons, a position counter, keyboard arrow controls, and polite screen-reader announcements. It does not advance automatically. Cards reserve the height of the longest entry to avoid page jumps, and inactive cards are excluded from accessibility and interaction. Board Members and Administrators continue to manage the entries and their order through Community Spotlight, with no code changes. Existing grouped recognition remains grouped as supplied.
+Community Spotlight displays one recognition card at a time, with Previous and Next buttons, a position counter, keyboard arrow controls, and polite screen-reader announcements. It advances every seven seconds, with a Pause/Resume control. Rotation pauses on hover, keyboard focus, and hidden browser tabs, and is disabled when reduced motion is requested. Cards reserve the height of the longest entry to avoid page jumps, and inactive cards are excluded from accessibility and interaction. Board Members and Administrators continue to manage the entries and their order through Community Spotlight, with no code changes. Existing grouped recognition remains grouped as supplied.
 
 Homepage order: entrance hero, featured Community Spotlight, Community News & Events, Facebook, dues, resident contact registration, and feedback. News retains the existing featured recap, photo, summary, and full-story link.
 
