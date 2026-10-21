@@ -14,6 +14,7 @@ export default function AdminWelcome() {
         and restore earlier content. Mark uploads public only when approved for
         everyone to see.
       </p>
+      <p><strong>Community Spotlight:</strong> Board Members and Administrators can open Website → Community Spotlight, add recognition entries, drag to reorder, and Save Draft. Use Preview to check the layout, then Publish changes. Select Feature on homepage before publishing to replace the current feature. Archive keeps published recognition in the archive; Unpublish removes it from public view. Use Versions to restore an earlier edition.</p>
       <Link href="/" target="_blank">
         View website ↗
       </Link>

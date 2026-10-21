@@ -46,3 +46,9 @@ export const news = cache(async () => {
     })
   ).docs;
 });
+
+export const spotlights = cache(async () => {
+  const p = await cms();
+  return (await p.find({ collection: "spotlights", overrideAccess: false,
+    depth: 1, limit: 100, sort: ["-featuredAt", "-id"] })).docs;
+});

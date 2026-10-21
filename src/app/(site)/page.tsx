@@ -1,15 +1,17 @@
+import { Spotlight } from "@/components/Spotlight";
 import { pageMetadata, SITE_NAME, SITE_DESCRIPTION, SITE_URL, organization } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
 export const metadata = { ...pageMetadata(SITE_NAME, SITE_DESCRIPTION, "/"), title: { absolute: SITE_NAME } };
 import Link from "next/link";
 import Image from "next/image";
 import { NewsGallery } from "@/components/NewsGallery";
-import { settings, dues, news } from "@/lib/content";
+import { settings, dues, news, spotlights } from "@/lib/content";
 export default async function Home() {
-  const [site, records, updates] = await Promise.all([
+  const [site, records, updates, recognition] = await Promise.all([
     settings(),
     dues(),
     news(),
+    spotlights(),
   ]);
   const year = new Date().getFullYear();
   const current = records.find((d) => d.year === year);
@@ -65,6 +67,7 @@ export default async function Home() {
           <span>Information. Connection. Community.</span>
         </div>
       </section>
+      {recognition.find(s => s.featured && !s.archived) ? <Spotlight item={recognition.find(s => s.featured && !s.archived)!} homepage /> : null}
       <section aria-labelledby="facebook-heading" style={{ background: "#e6eadf", borderTop: "1px solid #d4daca", borderBottom: "1px solid #d4daca" }}>
         <div className="wrap" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "24px 40px", paddingTop: 32, paddingBottom: 32 }}>
           <div style={{ flex: "1 1 260px" }}>

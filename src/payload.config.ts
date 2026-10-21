@@ -1,3 +1,4 @@
+import { Spotlights } from "./collections/spotlights";
 import { Feedback } from "./collections/feedback";
 import { buildConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
@@ -68,6 +69,7 @@ export default buildConfig({
         push: false,
       }),
   collections: [
+    Spotlights,
     Feedback,
     Users,
     Pages,

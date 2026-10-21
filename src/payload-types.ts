@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    spotlights: Spotlight;
     feedback: Feedback;
     users: User;
     pages: Page;
@@ -85,6 +86,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    spotlights: SpotlightsSelect<false> | SpotlightsSelect<true>;
     feedback: FeedbackSelect<false> | FeedbackSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -140,89 +142,51 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Recognize neighbors and community partners. Add entries and drag to reorder. Save Draft, Preview, then Publish changes. The most recently published featured Spotlight appears on the homepage; earlier published entries remain in the archive.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "feedback".
+ * via the `definition` "spotlights".
  */
-export interface Feedback {
-  id: number;
-  name: string;
-  email: string;
-  category: 'issue' | 'suggestion' | 'other';
-  subject: string;
-  pageUrl?: string | null;
-  message: string;
-  status: 'new' | 'reviewing' | 'resolved';
-  notes?: string | null;
-  attachments?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  idempotencyKey: string;
-  privacyAcceptedAt: string;
-  notification?: ('pending' | 'sent' | 'failed') | null;
-  notificationAttempts?: number | null;
-  notificationLastAttempt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  role: 'administrator' | 'board' | 'editor';
-  active?: boolean | null;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  resetPasswordRequestedAt?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
- */
-export interface Page {
+export interface Spotlight {
   id: number;
   title: string;
+  introduction: string;
   /**
-   * The final part of the page link. Example: sample-news-announcement. Use lowercase words separated by hyphens; avoid changing this after publication.
+   * Optional. The date of the gathering being recognized.
    */
-  slug: string;
-  summary: string;
+  meetingDate?: string | null;
   /**
-   * Plain text. Separate paragraphs with a blank line. HTML is not rendered.
+   * Optional. Visitors see a link only when the selected recap is published and not archived.
    */
-  body: string;
+  recap?: (number | null) | News;
+  recapLabel?: string | null;
   /**
-   * Record the source and its year. Never publish unverified neighborhood claims.
+   * Each entry receives equal visual emphasis. Drag entries to set their order. Photos are optional.
+   */
+  recognitions: {
+    name: string;
+    role: string;
+    message: string;
+    photo?: (number | null) | Media;
+    id?: string | null;
+  }[];
+  /**
+   * Leave new uploads private. Publishing with this confirmation makes the selected photos public.
+   */
+  photosApproved?: boolean | null;
+  /**
+   * Record who supplied the information and when. This field is for the board's reference.
    */
   source: string;
   /**
-   * Archived content is removed from public pages. Previous versions remain available.
+   * Publish with this selected to make this the homepage Spotlight. Only the most recently published featured Spotlight is shown.
+   */
+  featured?: boolean | null;
+  /**
+   * Removes this Spotlight from homepage eligibility. Published recognition remains readable in the archive. To remove it from public view entirely, unpublish it.
    */
   archived?: boolean | null;
+  featuredAt?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -324,6 +288,94 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feedback".
+ */
+export interface Feedback {
+  id: number;
+  name: string;
+  email: string;
+  category: 'issue' | 'suggestion' | 'other';
+  subject: string;
+  pageUrl?: string | null;
+  message: string;
+  status: 'new' | 'reviewing' | 'resolved';
+  notes?: string | null;
+  attachments?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  idempotencyKey: string;
+  privacyAcceptedAt: string;
+  notification?: ('pending' | 'sent' | 'failed') | null;
+  notificationAttempts?: number | null;
+  notificationLastAttempt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  role: 'administrator' | 'board' | 'editor';
+  active?: boolean | null;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  /**
+   * The final part of the page link. Example: sample-news-announcement. Use lowercase words separated by hyphens; avoid changing this after publication.
+   */
+  slug: string;
+  summary: string;
+  /**
+   * Plain text. Separate paragraphs with a blank line. HTML is not rendered.
+   */
+  body: string;
+  /**
+   * Record the source and its year. Never publish unverified neighborhood claims.
+   */
+  source: string;
+  /**
+   * Archived content is removed from public pages. Previous versions remain available.
+   */
+  archived?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -471,6 +523,10 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'spotlights';
+        value: number | Spotlight;
+      } | null)
+    | ({
         relationTo: 'feedback';
         value: number | Feedback;
       } | null)
@@ -555,6 +611,34 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "spotlights_select".
+ */
+export interface SpotlightsSelect<T extends boolean = true> {
+  title?: T;
+  introduction?: T;
+  meetingDate?: T;
+  recap?: T;
+  recapLabel?: T;
+  recognitions?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        message?: T;
+        photo?: T;
+        id?: T;
+      };
+  photosApproved?: T;
+  source?: T;
+  featured?: T;
+  archived?: T;
+  featuredAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -80,6 +80,7 @@ export default async function Layout({
             <div className="footer-links">
               <Link href="/resident-signup">Update your contact details ↗</Link>
               <Link href="/hoa-dues">Annual dues information ↗</Link>
+              <Link href="/spotlight">Community Spotlight ↗</Link>
               <a href={FACEBOOK} target="_blank" rel="noopener noreferrer">
                 Facebook group ↗
               </a>

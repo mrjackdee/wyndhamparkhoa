@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { news } from "@/lib/content";
+import { news, spotlights } from "@/lib/content";
 import { NewsArticle } from "@/components/NewsArticle";
 import { JsonLd } from "@/components/JsonLd";
 import { canonicalUrl, organization, pageMetadata } from "@/lib/seo";
@@ -27,6 +27,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const { slug } = await params;
   const story = (await news()).find((n) => n.slug === slug);
   if (!story) notFound();
+  const recognition = (await spotlights()).filter(item => (typeof item.recap === "object" ? item.recap?.id : item.recap) === story.id);
   const url = canonicalUrl("/news/" + slug);
   return <>
     <JsonLd data={{ "@context": "https://schema.org", "@graph": [organization, {
@@ -42,5 +43,6 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     ] }] }} />
     <div className="wrap narrow"><p><Link href="/">Home</Link> / <Link href="/news">News &amp; Events</Link> / {story.title}</p></div>
     <NewsArticle story={story} />
+    {recognition.length ? <aside className="wrap section narrow"><p className="eyebrow">COMMUNITY SPOTLIGHT</p><h2>Recognizing our neighbors and partners</h2>{recognition.map(item => <p key={item.id}><Link className="text-link" href={`/spotlight/${item.id}`}>{item.title} →</Link></p>)}</aside> : null}
   </>;
 }

@@ -1,4 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/migrate-database.mjs && npm run build && node --import tsx scripts/publish-meeting-recap.ts"
+  "buildCommand": "node scripts/migrate-database.mjs && npm run build && node --import tsx scripts/publish-meeting-recap.ts && node --import tsx scripts/publish-spotlight.ts"
 }

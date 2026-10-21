@@ -942,3 +942,26 @@ h1 em { font-weight: 600; }
 }
 
 @media (min-width: 1101px) { nav .nav-dues { border-radius: 9999px; } }
+
+/* Community recognition: editorial rows, equal emphasis, no carousel. */
+.community-spotlight { background: #f1ecdf; border-top: 3px solid var(--brick); }
+.spotlight-heading { max-width: 760px; margin-bottom: 32px; }
+.spotlight-heading h2 { margin-bottom: 16px; }
+.spotlight-title { font-size: 21px; margin-bottom: 12px; }
+.spotlight-heading .lead { font-size: 18px; margin-bottom: 14px; }
+.spotlight-date { font-size: 14px; color: var(--muted); }
+.recognitions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 56px; }
+.recognition { display: flex; gap: 20px; padding: 26px 0; border-top: 1px solid #bdc3b5; min-width: 0; }
+.recognition h3 { font-size: 20px; line-height: 1.4; margin: 0 0 6px; overflow-wrap: anywhere; }
+.recognition-role { font-size: 14px; font-weight: 600; color: var(--green); margin: 0 0 12px; }
+.recognition-message { margin: 0; max-width: 52ch; white-space: pre-line; overflow-wrap: anywhere; }
+.recognition-photo { width: 88px; height: 88px; object-fit: cover; flex-shrink: 0; }
+.spotlight-actions { margin-top: 28px; align-items: center; }
+.spotlight-archive article { border-top: 1px solid var(--line); padding: 28px 0; }
+.spotlight-archive h2 { font-size: 25px; }
+@media (max-width: 700px) {
+  .recognitions { grid-template-columns: minmax(0, 1fr); }
+  .recognition { gap: 16px; padding: 22px 0; }
+  .recognition-photo { width: 64px; height: 64px; }
+  .spotlight-heading { margin-bottom: 24px; }
+}

@@ -313,3 +313,27 @@ scripts/test-feedback-http.mjs targets only http://localhost:3000 with synthetic
 Board Members and Administrators can open Site settings, edit the Leadership entries, and save changes. Changes are reflected on HOA & Leadership. Board Members cannot change the hero photo, its crop position, or the homepage introduction; those fields remain administrator-only through server-enforced field permissions. Editors and anonymous visitors cannot update Site settings. Existing accounts keep their assigned role; no account privileges were changed individually.
 
 scripts/test-leadership-http.mjs verifies real HTTP Board Member roster updates, the public page rendering the saved name, denied edits to unrelated settings, and denied Editor/anonymous updates using synthetic local data only.
+
+## Community Spotlight (October 2026)
+
+**Board workflow:** HOA Administration → Website → Community Spotlight → Create New.
+Enter a title, short introduction, optional meeting date and related recap. Add each person or group with a name, role and recognition message. Drag recognition rows to reorder them. Optional photos use the existing private Media library; supply accessibility text and source, and confirm public-photo approval before publishing. The site controls all visual formatting.
+
+1. **Save Draft** stores work privately. When editing a published Spotlight, its previous published edition remains visible.
+2. **Preview** opens an authenticated view of the saved draft. Save first. Preview links require an active Administrator or Board Member account.
+3. **Feature on homepage** + **Publish changes** makes this the homepage feature. The most recently published featured, non-archived Spotlight wins, using `featuredAt` and ID as deterministic sorting keys. Publishing an older featured entry again intentionally promotes it. Uncheck Feature on homepage before publishing if it should not compete for the homepage.
+4. **Move to Spotlight archive** + **Publish changes** excludes it from the homepage but keeps its published recognition publicly readable. Earlier published Spotlights also remain in the archive automatically when a newer feature is selected.
+5. **Unpublish** removes the record from all public reads. **Versions** retains up to 30 editions and supports restoration. Restore a published version only when ready to make that edition public.
+6. Existing approved public photos remain public after a Spotlight is archived or unpublished. For sensitive photo removal, review reuse and change the Media item's visibility to Private as well.
+
+Public routes are `/spotlight` (archive), `/spotlight/[id]` (permanent recognition page), and the feature directly below the homepage hero. Related recap links only render for published, non-archived News records. Two equal columns become one at 700px. The design uses cream `#f1ecdf`, existing dark green text, a brick top rule, 20px recipient names, restrained role labels, dividers, and optional photo thumbnails. There are no bullets, carousel, or individual cards. Text is rendered as escaped React text, never HTML. Dates represent calendar days and display in UTC to prevent day shifts.
+
+**Permissions:** active Administrators and Board Members create, edit, publish, preview, archive, and restore; only Administrators delete. Editors and anonymous users can read published records only and cannot read draft versions or internal source notes. The existing user lookup revalidates active status server-side. No new service, account, credential, or recurring charge is introduced.
+
+**Storage / deployment:** Payload collection `spotlights` uses Neon tables `spotlights`, `spotlights_recognitions`, `_spotlights_v`, `_spotlights_v_version_recognitions`, plus a document-lock relationship. Additive SQL in `scripts/spotlights-schema.sql` runs transactionally from the existing migration runner before the production build; new tables enable PostgreSQL RLS and receive no public database grants. Existing Payload access rules remain the application authorization layer. Photos use the existing private upload service.
+
+`scripts/publish-spotlight.ts` imports the specifically approved October 17 recognition once on production, with a migration marker and advisory lock. It links the existing `meeting` recap, does not change its text/photos, and never resets future board edits. Later Spotlights require only the admin interface, with no code edits or deployment. The importer never runs against local or QA storage.
+
+**Recovery:** use Payload Versions for editorial restoration; unpublish accidental releases. Include the new tables in the existing Neon backup/recovery procedure and retain referenced Blob assets. Rolling back code does not remove the additive tables or existing recognition records. The import marker prevents duplicate first-time content.
+
+**Verification:** `node --env-file=.env.local --import tsx scripts/test-spotlights.ts` runs only against synthetic local SQLite, never Vercel or a configured production database. It checks both roles, editor denial, draft privacy, public source filtering, publishing, private edits over published content, version restoration, archiving, photo approval/privacy, unpublishing, and anonymous mutation denial. Run `npm run typecheck`, `npm run lint`, `npm test`, and a production build too. Local tests do not substitute for live board-session/browser acceptance checks.
