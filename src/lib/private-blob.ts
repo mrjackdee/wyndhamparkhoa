@@ -1,3 +1,4 @@
+import { videoResponse } from "./video-response";
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage';
 import type { Adapter } from '@payloadcms/plugin-cloud-storage/types';
 import { getStorageFilePath } from '@payloadcms/plugin-cloud-storage/utilities';
@@ -20,6 +21,10 @@ export const privateBlobAdapter: Adapter = ({ collection, prefix = 'media' }) =>
       const pathname = await getStorageFilePath({ collection, collectionPrefix: prefix, doc, filename, req });
       const result = await get(pathname, { access: 'private', token: process.env.BLOB_READ_WRITE_TOKEN });
       if (!result || result.statusCode !== 200) return new Response(null, { status: 404 });
+      if (result.blob.contentType === 'video/mp4') {
+        const bytes = new Uint8Array(await new Response(result.stream).arrayBuffer());
+        return videoResponse(bytes, req.headers.get('range'));
+      }
       return new Response(result.stream, { headers: {
         'Content-Type': result.blob.contentType,
         'Cache-Control': 'private, no-store',
