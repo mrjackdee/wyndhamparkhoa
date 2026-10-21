@@ -988,3 +988,8 @@ h1 em { font-weight: 600; }
 
 .home-community-video { margin: 0; min-width: 0; }
 .home-community-video figcaption { margin-top: 10px; font-size: 14px; color: var(--muted); }
+
+/* Consistent album frames preserve complete photos without cropping people. */
+.news-gallery { align-items: start; }
+.news-gallery figure { padding: 10px; border: 1px solid var(--line); background: var(--white); box-shadow: 0 2px 8px #24382e0a; }
+.news-gallery img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: contain; background: #eeeadd; border-radius: 0; }

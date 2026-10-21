@@ -353,3 +353,5 @@ Community Spotlight displays one recognition card at a time, with Previous and N
 Homepage order: entrance hero, featured Community Spotlight, Community News & Events, Facebook, dues, resident contact registration, and feedback. News retains the existing featured recap, photo, summary, and full-story link.
 
 Featured news with an approved public video shows its player in the homepage recap preview, with “Click play to watch.” The October 17 video uses an extracted poster frame. The full recap retains its photo gallery and article; the video is displayed on the homepage.
+
+Recap galleries use equal 4:3 album frames with contain fitting to preserve the full photographs. Captions duplicating image alt text are not displayed; alt text remains available to assistive technology. The October 17 recap (slug meeting) displays its date without time, timezone label, or residential address.
