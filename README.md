@@ -351,3 +351,5 @@ News records now support an optional silent MP4, approval checkbox, and accessib
 Community Spotlight displays one recognition card at a time, with Previous and Next buttons, a position counter, keyboard arrow controls, and polite screen-reader announcements. It does not advance automatically. Cards reserve the height of the longest entry to avoid page jumps, and inactive cards are excluded from accessibility and interaction. Board Members and Administrators continue to manage the entries and their order through Community Spotlight, with no code changes. Existing grouped recognition remains grouped as supplied.
 
 Homepage order: entrance hero, featured Community Spotlight, Community News & Events, Facebook, dues, resident contact registration, and feedback. News retains the existing featured recap, photo, summary, and full-story link.
+
+Featured news with an approved public video shows its player in the homepage recap preview, with “Click play to watch.” The October 17 video uses an extracted poster frame. The full recap retains its photo gallery and article; the video is displayed on the homepage.

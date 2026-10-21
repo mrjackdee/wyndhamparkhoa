@@ -16,6 +16,7 @@ export default async function Home() {
   const year = new Date().getFullYear();
   const current = records.find((d) => d.year === year);
   const featured = updates.find((n) => n.featured && !n.cancelled);
+  const featuredVideo = typeof featured?.video === "object" && featured.video?.visibility === "public" && featured.video.mimeType === "video/mp4" ? featured.video : null;
   const otherUpdates = updates.filter((n) => n.id !== featured?.id);
   const hero =
     site.hero &&
@@ -73,7 +74,13 @@ export default async function Home() {
           <p className="eyebrow">FROM THE ASSOCIATION</p>
           <h2>Community News &amp; Events.</h2>
           {featured ? <article className="news-feature">
-            <NewsGallery photos={featured.photos} coverOnly />
+            {featuredVideo?.url ? <figure className="home-community-video">
+              <video controls playsInline preload="metadata" poster={featuredVideo.filename === "community-meeting-silent.mp4" ? "/community-video-preview.jpg" : undefined} aria-label="Community event video" style={{ display: "block", width: "100%", aspectRatio: "16 / 9", background: "#1d4035" }}>
+                <source src={featuredVideo.url.replace(/^https:\/\/(?:wyndhamparkhoa\.vercel\.app|(?:www\.)?wyndhamparkhoa\.org)(?=\/api\/media\/)/, "")} type="video/mp4" />
+                <a href={featuredVideo.url}>Watch the video</a>
+              </video>
+              <figcaption>Click play to watch.</figcaption>
+            </figure> : <NewsGallery photos={featured.photos} coverOnly />}
             <div>
               <p className="eyebrow">COMMUNITY NEWS</p>
               <h3>{featured.title}</h3>

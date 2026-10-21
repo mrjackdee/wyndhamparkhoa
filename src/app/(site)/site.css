@@ -985,3 +985,6 @@ h1 em { font-weight: 600; }
   .recognition-carousel .recognition { padding: 24px; min-height: 240px; }
   .spotlight-actions { margin-top: 0; }
 }
+
+.home-community-video { margin: 0; min-width: 0; }
+.home-community-video figcaption { margin-top: 10px; font-size: 14px; color: var(--muted); }
