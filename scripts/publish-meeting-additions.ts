@@ -49,6 +49,16 @@ try {
     await db.query("INSERT INTO wphoa.payload_migrations (name,batch) VALUES ($1,1)", [marker]);
     console.log("Seven additional photos and one silent MP4 appended to the existing recap; prior content preserved.");
   } else console.log("Additional meeting media already imported; preserving board edits.");
+  const repaired = await db.query("SELECT 1 FROM wphoa.payload_migrations WHERE name=$1", [marker + "_photo_integrity"]);
+  if (!repaired.rowCount) {
+    p ??= await getPayload({ config });
+    const existing = await p.find({ collection: "media", where: { source: { contains: "file 1m-NwD7K7Xo3z8Ud8tQLB_TWBZ_Mavz_L; " + marker } }, limit: 2 });
+    if (existing.docs.length !== 1) throw new Error("Expected imported photo for integrity verification.");
+    await p.update({ collection: "media", id: existing.docs[0].id,
+      filePath: "assets/meeting-2026-10-17-additions/20261017_093643.jpg", data: {} });
+    await db.query("INSERT INTO wphoa.payload_migrations (name,batch) VALUES ($1,1)", [marker + "_photo_integrity"]);
+    console.log("Imported photo integrity correction completed.");
+  }
 } finally {
   if (p) await p.destroy();
   await db.query("SELECT pg_advisory_unlock(21102027)");
