@@ -1,3 +1,4 @@
+import { isSilentMP4 } from "../lib/silent-mp4";
 import { randomUUID } from "node:crypto";
 import { ValidationError } from "payload";
 import type {
@@ -264,6 +265,9 @@ export const News: CollectionConfig = {
       type: "checkbox", defaultValue: false,
       admin: { description: "Required before publishing photos. Draft uploads stay private; Publish changes makes the selected photos publicly accessible.",
         condition: (data) => Boolean(data.photos?.length) } },
+    { name: "video", label: "Optional silent video", type: "upload", relationTo: "media", filterOptions: { category: { equals: "video" } }, admin: { description: "Choose an approved MP4 exported without audio. Maximum 3 MB. Visitors control playback." } },
+    { name: "videoDescription", label: "Video description", type: "textarea", admin: { description: "Describe the video content in text for visitors who cannot watch it." } },
+    { name: "videoApproved", label: "This video is approved for public display", type: "checkbox", defaultValue: false, admin: { condition: (data) => Boolean(data.video) } },
     { name: "featured", label: "Feature on homepage", type: "checkbox", defaultValue: false,
       admin: { position: "sidebar", description: "Show this story above the other news and event rows." } },
     { name: "linkLabel", label: "Homepage button text", type: "text", defaultValue: "Read the story & view photos",
@@ -311,6 +315,14 @@ export const News: CollectionConfig = {
     beforeChange: [
       async ({ data, originalDoc, req }) => {
         if (data._status !== "published") return data;
+        const videoID = data.video ?? originalDoc?.video;
+        if (videoID) {
+          if (!(data.videoApproved ?? originalDoc?.videoApproved) || !(data.videoDescription ?? originalDoc?.videoDescription)?.trim())
+            throw new ValidationError({ errors: [{ path: "videoApproved", message: "Approve the video and add a text description before publishing." }] });
+          const video = await req.payload.findByID({ collection: "media", id: typeof videoID === "object" ? videoID.id : videoID, req, overrideAccess: false });
+          if (video.category !== "video" || video.mimeType !== "video/mp4") throw new ValidationError({ errors: [{ path: "video", message: "Choose a validated silent MP4 video." }] });
+          if (video.visibility !== "public") await req.payload.update({ collection: "media", id: video.id, data: { visibility: "public" }, req, overrideAccess: false });
+        }
         const photos = data.photos ?? originalDoc?.photos ?? [];
         if (photos.length && !(data.photosApproved ?? originalDoc?.photosApproved))
           throw new ValidationError({ errors: [{ path: "photosApproved",
@@ -372,7 +384,7 @@ export const Media: CollectionConfig = {
   access: { create: staff, read: publicMedia, update: staff, delete: admin },
   upload: {
     staticDir: "media",
-    mimeTypes: ["image/jpeg", "image/png", "image/webp", "application/pdf"],
+    mimeTypes: ["image/jpeg", "image/png", "image/webp", "application/pdf", "video/mp4"],
     filesRequiredOnCreate: true,
     disableLocalStorage: Boolean(process.env.S3_BUCKET),
   },
@@ -393,7 +405,7 @@ export const Media: CollectionConfig = {
       name: "category",
       type: "select",
       required: true,
-      options: ["photo", "document"],
+      options: ["photo", "document", "video"],
       defaultValue: "photo",
       admin: { position: "sidebar" },
     },
@@ -409,6 +421,7 @@ export const Media: CollectionConfig = {
             throw new Error("Maximum file size is 3 MB.");
           const b = req.file.data;
           const valid =
+            (req.file.mimetype === "video/mp4" && isSilentMP4(b)) ||
             (req.file.mimetype === "application/pdf" &&
               b.subarray(0, 5).toString() === "%PDF-") ||
             (req.file.mimetype === "image/png" &&
@@ -420,7 +433,8 @@ export const Media: CollectionConfig = {
             (req.file.mimetype === "image/webp" &&
               b.subarray(0, 4).toString() === "RIFF" &&
               b.subarray(8, 12).toString() === "WEBP");
-          if (!valid) throw new Error("File content does not match its type.");
+          if (!valid) throw new Error("File content does not match its type. MP4 videos must contain a video track and no audio track.");
+          if (req.file.mimetype === "video/mp4" && data) data.category = "video";
           req.file.name =
             randomUUID() +
             "." +
@@ -429,6 +443,7 @@ export const Media: CollectionConfig = {
               "image/jpeg": "jpg",
               "image/webp": "webp",
               "application/pdf": "pdf",
+              "video/mp4": "mp4",
             }[req.file.mimetype] ?? "bin");
         }
         if (data?.category === "photo" && !data.alt)

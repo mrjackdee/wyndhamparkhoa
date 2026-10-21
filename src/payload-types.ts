@@ -235,6 +235,15 @@ export interface News {
    */
   photosApproved?: boolean | null;
   /**
+   * Choose an approved MP4 exported without audio. Maximum 3 MB. Visitors control playback.
+   */
+  video?: (number | null) | Media;
+  /**
+   * Describe the video content in text for visitors who cannot watch it.
+   */
+  videoDescription?: string | null;
+  videoApproved?: boolean | null;
+  /**
    * Show this story above the other news and event rows.
    */
   featured?: boolean | null;
@@ -272,7 +281,7 @@ export interface Media {
    * Leave private for a news draft. Publishing an approved story makes its selected photos public.
    */
   visibility: 'private' | 'public';
-  category: 'photo' | 'document';
+  category: 'photo' | 'document' | 'video';
   /**
    * Who supplied it and when? For example: HOA meeting photos supplied by the board, October 2026.
    */
@@ -722,6 +731,9 @@ export interface NewsSelect<T extends boolean = true> {
         id?: T;
       };
   photosApproved?: T;
+  video?: T;
+  videoDescription?: T;
+  videoApproved?: T;
   featured?: T;
   linkLabel?: T;
   kind?: T;

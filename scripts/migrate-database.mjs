@@ -17,6 +17,11 @@ try {
     await query(sql);
     await query('INSERT INTO wphoa.payload_migrations (name, batch) VALUES ($1, $2)', ['20261013_232308', 1]);
   }
+  await query("ALTER TYPE wphoa.enum_media_category ADD VALUE IF NOT EXISTS 'video'");
+  for (const [table, prefix] of [['news', ''], ['_news_v', 'version_']]) {
+    await query(`ALTER TABLE wphoa.${table} ADD COLUMN IF NOT EXISTS ${prefix}video_id integer REFERENCES wphoa.media(id) ON DELETE SET NULL,
+      ADD COLUMN IF NOT EXISTS ${prefix}video_description varchar, ADD COLUMN IF NOT EXISTS ${prefix}video_approved boolean DEFAULT false`);
+  }
   await query('ALTER TABLE wphoa.media ADD COLUMN IF NOT EXISTS prefix varchar, ADD COLUMN IF NOT EXISTS _objectkey varchar');
   for (const [table, prefix] of [['news', ''], ['_news_v', 'version_']]) {
     await query(`ALTER TABLE wphoa.${table}
