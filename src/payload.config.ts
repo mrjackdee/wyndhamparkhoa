@@ -49,6 +49,7 @@ export default buildConfig({
     "https://wyndhamparkhoa.vercel.app",
   ])),
   admin: {
+    theme: "light",
     user: "users",
     meta: { titleSuffix: " | Wyndham Park HOA" },
     importMap: { baseDir: dirname },

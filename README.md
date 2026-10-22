@@ -355,3 +355,7 @@ Homepage order: entrance hero, featured Community Spotlight, Community News & Ev
 Featured news with an approved public video shows its player in the homepage recap preview, with “Click play to watch.” The October 17 video uses an extracted poster frame. The full recap retains its photo gallery and article; the video is displayed on the homepage.
 
 Recap galleries use equal 4:3 album frames with contain fitting to preserve the full photographs. Captions duplicating image alt text are not displayed; alt text remains available to assistive technology. The October 17 recap (slug meeting) displays its date without time, timezone label, or residential address.
+
+### Administration color theme
+
+Payload uses a fixed light theme matching the public site: cream #f6f3eb, ivory #fffdf7, deep green #294b39, dark text #24382e, brick #8b4d35, and warm borders #d8d3c5. The elevation scale themes navigation, tables, drawers, and form surfaces consistently. Primary actions use green and keyboard focus uses brick. Built-in error and warning colors remain distinct. Styles are scoped through the Payload layout custom.css import; roles and workflows are unchanged.

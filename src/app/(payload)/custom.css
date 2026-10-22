@@ -1,5 +1,5 @@
 .hoa-welcome {
-  border-top: 4px solid #34584d;
+  border-top: 4px solid #8b4d35;
   padding: 24px 0;
   max-width: 880px;
   margin-bottom: 28px;
@@ -47,3 +47,46 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+/* Shared public-site palette. Scoped to the Payload layout import. */
+:root, html[data-theme="light"] {
+  color-scheme: light;
+  --theme-elevation-0: #f6f3eb;
+  --theme-elevation-50: #f1ecdf;
+  --theme-elevation-100: #eae6d8;
+  --theme-elevation-150: #e1ddce;
+  --theme-elevation-200: #d8d3c5;
+  --theme-elevation-250: #c6c3b4;
+  --theme-elevation-300: #aeb5a5;
+  --theme-elevation-350: #939e8f;
+  --theme-elevation-400: #7b8979;
+  --theme-elevation-450: #657361;
+  --theme-elevation-500: #566257;
+  --theme-elevation-550: #4d5e50;
+  --theme-elevation-600: #435747;
+  --theme-elevation-650: #39523f;
+  --theme-elevation-700: #294b39;
+  --theme-elevation-750: #284333;
+  --theme-elevation-800: #24382e;
+  --theme-elevation-850: #20362b;
+  --theme-elevation-900: #1d3b2a;
+  --theme-elevation-950: #192e23;
+  --theme-elevation-1000: #132b1d;
+  --theme-bg: #f6f3eb;
+  --theme-text: #24382e;
+  --theme-input-bg: #fffdf7;
+  --theme-border-color: #d8d3c5;
+  --accessibility-outline: 3px solid #8b4d35;
+}
+.btn--style-primary:not(.btn--disabled) {
+  --bg-color: #294b39;
+  --color: #fffdf7;
+  --hover-bg: #1d3b2a;
+  --hover-color: #fffdf7;
+}
+.hoa-welcome > span { color: #8b4d35; }
+.hoa-tools { background: #fffdf7; border-top: 3px solid #8b4d35; }
+.hoa-tools input, .hoa-tools select { background: #fffdf7; color: #24382e; border: 1px solid #7b8979; }
+.hoa-tools button { background: #294b39; color: #fffdf7; border: 1px solid #294b39; }
+.hoa-tools button:hover:not(:disabled) { background: #1d3b2a; }
+.hoa-tools button:disabled { background: #eae6d8; color: #566257; cursor: not-allowed; }
