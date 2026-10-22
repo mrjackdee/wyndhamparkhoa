@@ -53,7 +53,7 @@ export default buildConfig({
     user: "users",
     meta: { titleSuffix: " | Wyndham Park HOA" },
     importMap: { baseDir: dirname },
-    components: { beforeDashboard: ["@/components/AdminWelcome#default"] },
+    components: { graphics: { Logo: "@/components/AdminBrand#AdminLogo", Icon: "@/components/AdminBrand#AdminIcon" }, beforeDashboard: ["@/components/AdminWelcome#default"] },
   },
   db: local
     ? sqliteAdapter({

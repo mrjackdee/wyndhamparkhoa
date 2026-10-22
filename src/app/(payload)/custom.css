@@ -90,3 +90,30 @@
 .hoa-tools button { background: #294b39; color: #fffdf7; border: 1px solid #294b39; }
 .hoa-tools button:hover:not(:disabled) { background: #1d3b2a; }
 .hoa-tools button:disabled { background: #eae6d8; color: #566257; cursor: not-allowed; }
+
+.hoa-admin-brand { display: flex; align-items: center; justify-content: center; gap: 16px; color: #24382e; }
+.hoa-admin-brand strong { display: block; font-size: clamp(20px, 5vw, 28px); letter-spacing: .03em; line-height: 1.2; }
+.hoa-admin-brand > div > span { display: block; margin-top: 8px; font-size: 15px; color: #566257; }
+.hoa-admin-monogram { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; box-sizing: border-box; width: 52px; height: 52px; border: 1px solid #aa9873; border-radius: 50%; color: #294b39; font-size: 29px; letter-spacing: -.3em; padding-right: .3em; }
+.hoa-admin-monogram > span { font-size: 24px; transform: translateY(5px); }
+.app-header .hoa-admin-monogram { width: 32px; height: 32px; font-size: 19px; }
+.app-header .hoa-admin-monogram > span { font-size: 16px; transform: translateY(3px); }
+
+/* Match public-site typography and action controls without changing editor layouts. */
+html { --font-body: var(--font-inter), Arial, sans-serif; --font-serif: var(--font-inter), Arial, sans-serif; }
+body, button, input, textarea, select { font-family: var(--font-body); }
+.hoa-welcome h1 { font-family: var(--font-body); font-size: clamp(28px, 3vw, 38px); font-weight: 600; letter-spacing: -.035em; line-height: 1.2; margin: 14px 0 20px; }
+.hoa-welcome p { font-size: 15px; line-height: 1.75; margin: 0 0 14px; }
+.hoa-welcome-intro { color: #566257; }
+.hoa-admin-guide { margin-top: 32px; }
+.hoa-admin-guide > section { border-top: 1px solid #d8d3c5; padding: 24px 0; }
+.hoa-admin-guide h2 { font-size: 20px; font-weight: 600; letter-spacing: -.025em; margin: 0 0 14px; }
+.hoa-admin-guide p:last-child { margin-bottom: 0; }
+.hoa-site-button { display: inline-flex; align-items: center; gap: 24px; background: #294b39; color: #fffdf7; text-decoration: none; padding: 14px 20px; min-height: 48px; border: 1px solid #294b39; border-radius: 9999px; font-size: 13px; font-weight: 600; box-shadow: 0 2px 0 #132b1d; }
+.hoa-site-button:hover { background: #1d3b2a; color: #fffdf7; }
+.btn--style-primary, .btn--style-secondary, .hoa-tools button { border-radius: 9999px; font-weight: 600; letter-spacing: .025em; }
+.btn--style-primary:not(.btn--disabled) { box-shadow: 0 2px 0 #132b1d; }
+.btn--style-secondary:not(.btn--disabled) { --btn-border: 1px solid #8e9987; --hover-color: #24382e; --hover-bg: #e7e9dc; }
+.btn--size-large, .btn--size-medium, .hoa-tools button { min-height: 44px; }
+.hoa-site-button:focus-visible, .hoa-tools button:focus-visible { outline: 3px solid #8b4d35; outline-offset: 4px; }
+.hoa-site-button:active, .btn--style-primary:not(.btn--disabled):active { transform: translateY(1px); box-shadow: none; }

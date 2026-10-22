@@ -1,5 +1,14 @@
 import { z } from "zod";
 import type { Payload } from "payload";
+// Conservative check: both fields must be long, unbroken, randomly cased strings.
+// Ordinary names, acronyms, Unicode text and descriptive subjects remain valid.
+export function looksLikeAutomatedFeedback(name: string, subject: string) {
+  const scrambled = (value: string) => {
+    if (!/^[A-Za-z]{14,}$/.test(value.trim())) return false;
+    return (value.match(/[a-z][A-Z]/g) ?? []).length >= 4;
+  };
+  return scrambled(name) && scrambled(subject);
+}
 export const feedbackSchema = z.object({
   name: z.string().trim().min(1).max(120),
   email: z.string().trim().email().max(254),

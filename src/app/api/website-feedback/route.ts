@@ -7,6 +7,7 @@ import { sameOrigin, verifyToken } from "@/lib/security";
 import { takeRateSlot } from "@/lib/submission";
 import {
   feedbackSchema,
+  looksLikeAutomatedFeedback,
   attachmentType,
   notifyFeedback,
   type FeedbackAttachment,
@@ -44,6 +45,11 @@ export async function POST(request: Request) {
   if (!verifyToken(v.token))
     return Response.json(
       { error: "Please wait a moment and try again.", refreshToken: true },
+      { status: 400 },
+    );
+  if (looksLikeAutomatedFeedback(v.name, v.subject))
+    return Response.json(
+      { error: "Please enter your name and a short, descriptive subject so the board can review your feedback." },
       { status: 400 },
     );
   const files = form

@@ -1,3 +1,5 @@
+import { Inter } from "next/font/google";
+const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
 import config from "@payload-config";
 import "@payloadcms/next/css";
 import { RootLayout, handleServerFunctions } from "@payloadcms/next/layouts";
@@ -11,6 +13,7 @@ const serverFunction: ServerFunctionClient = async (args) => {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <RootLayout
+      htmlProps={{ className: inter.variable }}
       config={config}
       importMap={importMap}
       serverFunction={serverFunction}

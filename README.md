@@ -359,3 +359,9 @@ Recap galleries use equal 4:3 album frames with contain fitting to preserve the 
 ### Administration color theme
 
 Payload uses a fixed light theme matching the public site: cream #f6f3eb, ivory #fffdf7, deep green #294b39, dark text #24382e, brick #8b4d35, and warm borders #d8d3c5. The elevation scale themes navigation, tables, drawers, and form surfaces consistently. Primary actions use green and keyboard focus uses brick. Built-in error and warning colors remain distinct. Styles are scoped through the Payload layout custom.css import; roles and workflows are unchanged.
+
+Admin branding uses the existing Wyndham Park WP monogram with “Wyndham Park” and “HOA Administration” on authentication screens. Payload Logo and Icon component slots are configured in payload.config.ts and registered in the generated admin import map.
+
+Administration also uses the same self-hosted Inter font as the public site, rounded primary and secondary actions, and a structured dashboard guide with separate content, Spotlight, resident review, and user-access sections.
+
+Feedback spam filtering also rejects paired long, unbroken, heavily mixed-case name and subject values before uploads, database writes or notifications. This conservative heuristic supplements the honeypot, signed timing token and durable rate limit; it does not guarantee prevention of all spam. Existing records are retained for board review.

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { feedbackSchema, attachmentType } from "../src/lib/feedback";
+import { feedbackSchema, attachmentType, looksLikeAutomatedFeedback } from "../src/lib/feedback";
 test("feedback requires valid contact, message, consent and honeypot", () => {
   const valid = {
     name: "Synthetic",
@@ -35,4 +35,14 @@ test("attachments require supported file signatures", () => {
     attachmentType(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
     "image/png",
   );
+});
+
+test("rejects paired scrambled fields without blocking normal names and subjects", () => {
+  assert.equal(looksLikeAutomatedFeedback("aBcDeFgHiJkLmNoP", "qRsTuVwXyZaBcDeF"), true);
+  for (const [name, subject] of [
+    ["Anne McDonald", "Website feedback"], ["José García", "HOA WEBSITE"],
+    ["李明", "网站建议"], ["Christopher", "Registration"],
+    ["aBcDeFgHiJkLmNoP", "Problem with login"],
+    ["Jack Dee", "qRsTuVwXyZaBcDeF"],
+  ]) assert.equal(looksLikeAutomatedFeedback(name, subject), false);
 });
