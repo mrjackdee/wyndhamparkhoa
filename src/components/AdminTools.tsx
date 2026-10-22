@@ -155,27 +155,47 @@ type ResidentMatch = {
   email: string;
 };
 export function SubmissionReview() {
-  const { id, data } = useDocumentInfo();
+  const { id } = useDocumentInfo();
+  const [submission, setSubmission] = useState<{ status: string; requestType: string } | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    if (!id) return;
+    let active = true;
+    fetch(`/api/submissions/${encodeURIComponent(String(id))}?depth=0`, { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Could not load this request. Refresh the page or sign in again.");
+        return response.json();
+      })
+      .then((doc) => { if (active) setSubmission(doc); })
+      .catch((err) => { if (active) setError(err.message); });
+    return () => { active = false; };
+  }, [id]);
   if (!id) return null;
-  if (data?.status !== "pending")
-    return (
-      <p role="status">
-        This request is {String(data?.status ?? "saved")}.{" "}
-        <Link href="/admin/collections/residents">View resident records</Link>
-      </p>
-    );
-  return (
-    <ReviewPanel
-      key={String(id)}
-      id={String(id)}
-      isUpdate={data?.requestType === "update"}
-    />
-  );
+  if (error) return <p role="alert">{error}</p>;
+  if (!submission) return <p role="status">Loading submission review…</p>;
+  if (submission.status !== "pending") return <p role="status">This request is {submission.status}. <Link href="/admin/collections/residents">View resident records</Link></p>;
+  return <ReviewPanel key={String(id)} id={String(id)} isUpdate={submission.requestType === "update"} />;
 }
 export function ReviewTools() {
+  const [pending, setPending] = useState<{ id: string | number; name: string }[]>([]);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let active = true;
+    fetch("/api/submissions?where[status][equals]=pending&limit=100&depth=0", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Unable to load pending requests. Refresh or sign in again.");
+        return response.json();
+      })
+      .then((result) => { if (active) setPending(result.docs); })
+      .catch((err) => { if (active) setError(err.message); });
+    return () => { active = false; };
+  }, []);
   return (
     <section className="hoa-tools">
       <h2>Review resident signups</h2>
+      <p>Open a request using <strong>Review submission</strong> below. You do not need to use the Edit control on protected contact fields.</p>
+      {error && <p role="alert">{error}</p>}
+      {pending.length > 0 && <ul>{pending.map((doc) => <li key={doc.id} style={{ marginBottom: 16 }}><strong>{doc.name}</strong>{" "}<Link className="hoa-site-button" href={`/admin/collections/submissions/${doc.id}`}>Review submission</Link></li>)}</ul>}
       <p>
         Choose a person from the list below. Their request opens with a review
         panel where you can check for an existing resident and approve the
