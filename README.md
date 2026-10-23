@@ -374,3 +374,72 @@ In Website → News and events, open the story and use **Show photo gallery on w
 - Community recognition advances every seven seconds. Pause/Resume remains visible and reflects playback. Hover does not stop rotation. Keyboard focus pauses for accessibility; Resume explicitly restarts playback. Reduced-motion visitors start paused and can opt in with Resume. Hidden browser tabs do not advance slides.
 - `ResidentSignupPrompt` uses a native modal dialog on public pages after 1.2 seconds. Close, Not now, Escape, and the signup link dismiss it. Browser local storage key `wphoa-resident-invitation-seen` remembers the first display; an in-memory fallback works when storage is blocked. Clearing browser storage or using a new browser allows the invitation again. It stores no resident data and adds no analytics.
 - Signup, feedback, and policy routes suppress the invitation. Native dialog focus containment, focus restoration, scroll locking, and responsive sizing support keyboard and mobile use. The prompt only links to the existing signup workflow and does not submit information.
+
+### Resident submission review workspace
+The Submissions collection uses `SubmissionWorkspace` as its list view. Administrators and active Board Members get a single server-filtered queue, 15 records per page, with Needs review (oldest first), Approved, Archived, and All filters. Search matches name, address, or email. Reviewed records without a linked resident are not labeled Approved. Existing records use their existing status values and IDs; no data migration is required.
+
+Review opens a native modal side panel, full-screen on mobile. It shows submitted details, normalized possible matches (name, email, address, or phone), expandable related pending requests, and a side-by-side comparison for the selected resident. Match suggestions never merge records automatically. A new record requires an explicit choice; possible matches require confirmation that it is a different person. Update requests require an existing resident. Blank spouse/mobile values retain existing data unless a reviewer explicitly selects Clear. Internal notes save separately. Unsaved notes block decisions and prompt before closing.
+
+`/api/resident-review` checks the active user role on every request, sets private/no-store responses, and checks origin on mutations. Editor and visitor access is denied. The approval service creates a temporary unique roster lock plus the existing per-submission review claim inside a database transaction. Resident changes, timestamped preference history, submission linkage/status, and audit events commit together or roll back. A stale resident timestamp blocks an update. Archive uses the same roster lock and rechecks status. Approval does not confirm payment or membership and does not send messages. The existing Excel roster export and permissions are retained. Audit events identify the reviewer and decision using record IDs, without copying contact information.
+
+Run the isolated regression script with `LOCAL_TEST_MODE=true`, a disposable `TEST_DATABASE_URL` containing `review-qa`, and a local-only `PAYLOAD_SECRET`: `node --import tsx scripts/test-resident-review.ts`. Never point this script at production. It covers approval, optional-field preservation, original signup date, preference history, duplicate checks, repeat approvals, rollback, and role boundaries. Delete the disposable QA database after testing. Standard verification: `npm run typecheck`, `npm run lint`, `npm test`, and the Vercel production build. The administration translation changes Globals to Global.
+
+## Resident workflow and configurable access (October 2026)
+
+### Volunteer instructions
+
+1. Residents enter their details, select **Review Information**, and check every field. **Edit Information** returns to the unchanged form. Only **Submit Registration** or **Submit Update Request** saves a request. Confirmation is shown after the server confirms durable storage.
+2. Open **Private records → Resident Submissions**. Needs review is the default, oldest first. Search by name, address, or email. Select Review to open the comparison panel. Save Notes only saves internal notes. Choose the correct existing resident for updates; approve a new person only after reviewing possible matches. Blank optional values preserve existing information unless explicitly cleared.
+3. **View Resident Roster** opens the existing resident list. Open a record to edit contact details. **Download formatted Excel list** downloads active residents only, including original signup dates. Keep exports private.
+4. **Review Possible Duplicates** presents suggestions, not automatic matches. Compare the two records, choose the survivor and every conflicting value, inspect preference history, document the evidence and decision, and review the merge confirmation. Keep Separate suppresses that pair until a record changes. Merge archives the duplicate and retains source records in protected review history.
+5. **Recover merge** restores saved records and submission links only if no relevant record changed afterward. If recovery is blocked, an Administrator must compare the protected saved snapshots with current records, confirm the correct information with the resident if necessary, and make a documented correction. Do not restore an old database over newer activity.
+6. Administrators use **Access → Roles** to configure permissions and **Access → Users → Assigned roles** to assign one or more teams. Save changes to apply them to subsequent requests, including existing sessions. Disable Active to revoke access. Keep at least one active Administrator.
+
+### Permission model
+
+Roles are records in `roles`. Users have a many-to-many `roles` relationship and an internal `rolesMigrated` marker. Effective grants are the union of fresh database role reads. JWT role values are never trusted for authorization. Administrator is a protected built-in role key with full access. Administrators alone manage role definitions, role assignments, users, security settings, dues and audit history. Role deletion is disabled to prevent accidental dangling assignments; remove assignments to retire a role. Custom roles can be created through the CMS.
+
+| Initial role | Grants |
+| --- | --- |
+| Administrator | All capabilities, users, roles, audit history, dues and settings |
+| Board Member | Leadership, public pages/news/media and feedback review |
+| Membership | Resident and submission read, resident editing, approval, export, duplicate reconciliation/recovery |
+| Public Relations | Community Spotlight drafts, previews, publishing, archive and required media access |
+| Content Editor | Existing public page/news/media editing |
+
+Board public-content and feedback capabilities are retained from the earlier system. Resident-data access comes from Membership or Administrator, not from Board Member alone. Existing legacy Board accounts receive explicit Board Member + Membership + Public Relations assignments during migration to preserve their previous authorized access. Administrators can subsequently remove assignments to reflect the board's confirmed responsibilities. Public-content Editors are not granted resident access. For custom resident workflows, include resident read alongside the desired action permissions. Leadership editing remains separate from administrator-only site settings.
+
+Every protected collection, review/reconciliation endpoint, export and private preview enforces server access. UI visibility is not an authorization boundary. Security changes are audited; a transactional unique claim serializes account changes so concurrent demotions/deletions cannot remove the final active Administrator. Role permission changes are read on the next authorization check.
+
+### Data and migration
+
+- Existing single-role values remain for backward compatibility and audit traceability. No resident or submission is recreated by migration.
+- `scripts/migrate-membership.mjs` runs inside the existing migration transaction and advisory lock. Before the new schema is created, affected tables are locked and a JSON backup of all existing schema tables is written to **private Vercel Blob**. The backup is read back and checked using SHA-256 before migration proceeds. Failure rolls back the migration. Backup paths and checksums may appear in protected build logs; records and credentials do not.
+- New tables: `roles`, `roles_permissions`, `users_rels`, `reconciliations`. New fields: users.rolesMigrated, audit.details, submissions.reviewedAt/reviewedBy. Tables enable PostgreSQL row-level security; application access is additionally enforced by Payload. There are no public direct-database credentials.
+- Terry Harrison and Edith Lee receive Membership only when exactly one existing account matches each full name. No account is created or inferred from public contact emails. Ambiguous/missing matches are reported for owner confirmation. Existing roles are retained.
+- Historical approval metadata is backfilled only where an existing matching approval audit record supplies the reviewer/time. Missing historical evidence is not invented.
+- Approval checks current submission and resident versions, uses a persistent unique submission claim, updates the roster, preference history, approval linkage and audit in one transaction. Failed writes roll back together. Notes-only saves use a conditional version check.
+- Merge/recovery share the roster transaction lock with approvals and use conditional resident/submission writes to reject concurrent edits. The survivor retains the earliest known original signup date. Original timestamps, preference history, source snapshots, submission links and reviewer decisions remain in restricted reconciliation history. Archived duplicates are excluded from normal CSV/XLSX exports.
+- Signup retains server validation, origin checks, signed time-limited form tokens, honeypot and database-backed rate limiting. A random per-request key, retained in session storage for refresh/retry protection, is unique in durable storage. No resident personal information is stored in browser storage. Saving and notification delivery remain separate; failed notification is retryable without repeating registration.
+
+### Backup and recovery operations
+
+Backups are private objects under `backups/before-membership-*.json`. They contain sensitive database records, including account authentication material, and must never be downloaded to a public folder, attached to email or committed to Git. Restrict Vercel/Blob operator access. The JSON snapshot covers database rows; existing upload objects remain in private Blob and are not duplicated by this migration.
+
+For disaster recovery, first stop writes, take a fresh backup and preserve the current database. A database operator should restore the pre-migration schema/version and table rows into a separate Neon branch/schema, reset serial sequences to the restored maximum IDs, verify row counts/foreign keys and authentication with the matching application version, and only then plan a controlled switchover. Do not run destructive blanket restores against production. Routine mistaken merges use the application recovery action described above instead. Neon point-in-time recovery/branch retention and Blob usage depend on the account's plan; this change does not purchase a service or promise a retention period.
+
+### Preview isolation and QA
+
+`scripts/build.mjs` rejects Vercel previews without a valid `wphoa_qa_<12 hex>` schema. Preview uses synthetic data and no production SMTP configuration. Production uses `wphoa`. Preview schema isolation prevents migrations or test records from modifying the live roster. Deploy preview first; release production only after migration, build, authorization and browser checks.
+
+Local checks:
+
+```sh
+npm run lint
+npm run typecheck
+npm test
+LOCAL_TEST_MODE=true PAYLOAD_SECRET='<local test signing secret>' TEST_DATABASE_URL=file:/tmp/membership-qa-unique.db node --import tsx scripts/test-membership.ts
+LOCAL_TEST_MODE=true PAYLOAD_SECRET='<local test signing secret>' TEST_DATABASE_URL=file:/tmp/review-qa-unique.db node --import tsx scripts/test-resident-review.ts
+```
+
+Use a new synthetic database filename per test run. Never point these scripts at real resident records. `test-membership.ts` checks individual/combined roles, self-escalation, final Administrator protection, fresh permission revocation, approval, conflicts, merge, recovery and later-edit protection. `test-resident-review.ts` exercises update target selection, optional preservation, duplicate approval protection and atomic rollback on audit failure. Browser and deployed verification results must be recorded separately; passing local tests alone is not a production sign-off.

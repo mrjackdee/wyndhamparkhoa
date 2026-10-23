@@ -1,14 +1,14 @@
 import { getPayload, createLocalReq } from "payload";
 import config from "@payload-config";
 import { get } from "@vercel/blob";
-import { residentManager } from "@/lib/access";
+import { can } from "@/lib/access";
 import { sameOrigin } from "@/lib/security";
 import { notifyFeedback, type FeedbackAttachment } from "@/lib/feedback";
 async function authorized(request: Request) {
   const payload = await getPayload({ config });
   const auth = await payload.auth({ headers: request.headers });
   const req = await createLocalReq({ user: auth.user ?? undefined }, payload);
-  return { payload, allowed: await residentManager({ req }) };
+  return { payload, allowed: await can(req, "feedback.manage") };
 }
 type Context = { params: Promise<{ id: string }> };
 export async function GET(request: Request, { params }: Context) {

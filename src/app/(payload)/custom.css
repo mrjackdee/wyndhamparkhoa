@@ -117,3 +117,69 @@ body, button, input, textarea, select { font-family: var(--font-body); }
 .btn--size-large, .btn--size-medium, .hoa-tools button { min-height: 44px; }
 .hoa-site-button:focus-visible, .hoa-tools button:focus-visible { outline: 3px solid #8b4d35; outline-offset: 4px; }
 .hoa-site-button:active, .btn--style-primary:not(.btn--disabled):active { transform: translateY(1px); box-shadow: none; }
+
+/* Resident review workspace */
+.resident-workspace { max-width: 1440px; width: 100%; margin: 0 auto; padding: 32px clamp(16px, 3vw, 48px); color: #203e34; }
+.rw-header { display: flex; align-items: start; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+.rw-header h1 { font-size: clamp(26px, 3vw, 36px); margin: 0 0 10px; }
+.rw-header p { max-width: 70ch; margin: 0; line-height: 1.6; }
+.rw-button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 18px; border: 1px solid #294d3d; border-radius: 28px; background: #294d3d; color: #fffdf6; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; gap: 8px; }
+.rw-button.secondary { background: transparent; color: #294d3d; }
+.rw-button:hover:not(:disabled) { background: #183a2a; color: #fff; }
+.rw-button:disabled { opacity: .5; cursor: not-allowed; }
+.resident-workspace :focus-visible, .rw-drawer :focus-visible { outline: 3px solid #8e4c34; outline-offset: 3px; }
+.rw-toolbar { display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; align-items: end; margin-bottom: 24px; }
+.rw-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.rw-filters button { min-height: 44px; border: 1px solid #c9cec2; background: transparent; border-radius: 6px; padding: 10px 12px; font: inherit; color: #294d3d; cursor: pointer; }
+.rw-filters button[aria-pressed=true] { background: #294d3d; color: white; }
+.rw-filters span { margin-left: 6px; font-variant-numeric: tabular-nums; }
+.rw-search label { display: block; font-size: 13px; margin-bottom: 8px; }
+.rw-search > div { display: flex; gap: 8px; }
+.rw-search input, .rw-drawer textarea { border: 1px solid #899788; border-radius: 5px; min-height: 44px; padding: 10px; background: #fffdf7; color: #203e34; font: inherit; width: 100%; }
+.rw-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.rw-table th, .rw-table td { text-align: left; padding: 16px 12px; border-bottom: 1px solid #d7d6c9; vertical-align: middle; }
+.rw-table th { background: #e9e7da; font-size: 13px; }
+.rw-table tbody tr:nth-child(even) { background: #f1eee3; }
+.rw-status { display: inline-block; border-radius: 4px; padding: 5px 9px; font-size: 12px; background: #eee2c5; color: #58451b; }
+.rw-status.reviewed { background: #e0ebde; color: #254a31; }
+.rw-status.archived { background: #e8e6df; color: #4e514b; }
+.rw-pagination, .rw-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.rw-pagination { justify-content: space-between; margin-top: 24px; }
+.rw-meta { font-size: 12px; color: #526054; line-height: 1.6; }
+.rw-notice, .rw-empty { background: #e9eddf; padding: 16px; border-left: 3px solid #627c51; line-height: 1.6; }
+.rw-error { background: #f5e7df; border-left: 3px solid #963f29; padding: 16px; }
+.rw-drawer { position: fixed; inset: 0 0 0 auto; margin: 0; width: min(760px, 95vw); height: 100dvh; max-height: 100dvh; max-width: 100vw; border: 0; border-left: 1px solid #c8c9bc; padding: 28px; overflow-y: auto; background: #faf8ef; color: #203e34; font-family: inherit; }
+.rw-drawer::backdrop { background: #10271d88; }
+.rw-drawer-heading { display: flex; justify-content: space-between; align-items: start; gap: 20px; }
+.rw-drawer h2 { margin: 0; font-size: 28px; }
+.rw-drawer h3 { font-size: 20px; margin: 0 0 14px; }
+.rw-drawer section { border-top: 1px solid #d7d6c9; padding-top: 24px; margin-top: 24px; }
+.rw-drawer p { line-height: 1.6; }
+.rw-details { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.rw-details dt { font-size: 12px; color: #526054; margin-bottom: 5px; }
+.rw-details dd { margin: 0; overflow-wrap: anywhere; }
+.rw-choice { display: flex; gap: 10px; align-items: start; margin: 14px 0; line-height: 1.6; padding: 7px 0; }
+.rw-choice input { flex: 0 0 auto; width: 20px; height: 20px; margin-top: 2px; accent-color: #294d3d; }
+.rw-drawer fieldset { margin: 20px 0; border: 1px solid #c8c9bc; padding: 16px; }
+.rw-compare { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; }
+.rw-compare th, .rw-compare td { text-align: left; padding: 10px; border: 1px solid #d7d6c9; overflow-wrap: anywhere; vertical-align: top; }
+.rw-compare .changed { background: #ede8d4; }
+.rw-compare small { display: block; margin-top: 6px; font-size: 11px; }
+.rw-decision { margin-top: 28px; border-top: 2px solid #294d3d; padding-top: 16px; }
+.rw-drawer textarea { margin: 8px 0 12px; }
+@media(max-width:700px) {
+  .rw-header { flex-direction: column; }
+  .rw-toolbar, .rw-search { width: 100%; }
+  .rw-table thead { display: none; }
+  .rw-table, .rw-table tbody, .rw-table tr, .rw-table td { display: block; width: 100%; }
+  .rw-table tr { padding: 12px; margin-bottom: 14px; border: 1px solid #d7d6c9; border-radius: 6px; }
+  .rw-table td { border: 0; padding: 7px 0; }
+  .rw-table td[data-label]::before { content: attr(data-label); display: block; color: #526054; font-size: 12px; margin-bottom: 4px; }
+  .rw-drawer { width: 100vw; padding: 20px; }
+  .rw-details { grid-template-columns: 1fr; }
+  .rw-actions > * { width: 100%; }
+  .rw-compare th, .rw-compare td { padding: 7px; }
+}
+.duplicate-pair {display:grid;grid-template-columns:1fr 1fr auto;gap:1rem;padding:1rem 0;border-bottom:1px solid #d6d8cf;align-items:center}
+.duplicate-fields fieldset {margin:1rem 0;padding:1rem;border:1px solid #c9cebf}.duplicate-fields label{display:block;margin:.5rem 0}.rw-workspace button,.rw-dialog button{min-height:44px}.rw-dialog textarea{width:100%;min-height:110px}.rw-dialog select{min-height:44px;max-width:100%}
+@media(max-width:700px){.duplicate-pair{grid-template-columns:1fr}.duplicate-pair p{margin:.3rem 0}}

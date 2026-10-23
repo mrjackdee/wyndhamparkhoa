@@ -1,3 +1,5 @@
+import { Reconciliations } from "./collections/reconciliations";
+import { Roles } from "./collections/roles";
 import { Spotlights } from "./collections/spotlights";
 import { Feedback } from "./collections/feedback";
 import { buildConfig } from "payload";
@@ -21,9 +23,10 @@ import {
   Audit,
   ReviewClaims,
 } from "./collections";
-import { staff, residentManager, role } from "./lib/access";
+import { staff, permit, role } from "./lib/access";
 const databaseSchema = process.env.HOA_QA_SCHEMA ?? "wphoa";
 if (databaseSchema !== "wphoa" && !/^wphoa_qa_[a-f0-9]{12}$/.test(databaseSchema)) throw new Error("Invalid isolated QA schema");
+const runtimeSiteURL = process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const local = process.env.LOCAL_TEST_MODE === "true" && !process.env.VERCEL;
 if (!local && !process.env.DATABASE_URL)
@@ -38,11 +41,13 @@ if (
     "Private durable upload storage and a signing secret are required.",
   );
 export default buildConfig({
+  i18n: { translations: { en: { general: { globals: "Global" } } } },
   secret: process.env.PAYLOAD_SECRET ?? "",
-  serverURL: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  serverURL: runtimeSiteURL,
   // Explicit trusted origins: the public domain and the existing admin hostname.
   // Never derive this allowlist from untrusted request headers.
   csrf: Array.from(new Set([
+    runtimeSiteURL,
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
     "https://www.wyndhamparkhoa.org",
     "https://wyndhamparkhoa.org",
@@ -73,6 +78,8 @@ export default buildConfig({
     Spotlights,
     Feedback,
     Users,
+    Roles,
+    Reconciliations,
     Pages,
     News,
     Dues,
@@ -87,7 +94,7 @@ export default buildConfig({
     {
       slug: "site-settings",
       label: "Site settings",
-      access: { read: () => true, update: residentManager, readVersions: staff },
+      access: { read: () => true, update: permit("leadership.manage"), readVersions: staff },
       versions: { max: 30 },
       fields: [
         {

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { del } from "@vercel/blob";
-import { admin, nobody, residentManager } from "../lib/access";
+import { admin, nobody, permit } from "../lib/access";
 import type { FeedbackAttachment } from "../lib/feedback";
 const fieldDenied = () => false;
 const locked = { update: fieldDenied };
@@ -15,8 +15,8 @@ export const Feedback: CollectionConfig = {
   },
   access: {
     create: nobody,
-    read: residentManager,
-    update: residentManager,
+    read: permit("feedback.manage"),
+    update: permit("feedback.manage"),
     delete: admin,
   },
   fields: [

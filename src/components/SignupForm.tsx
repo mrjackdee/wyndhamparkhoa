@@ -4,6 +4,10 @@ import Link from "next/link";
 export default function SignupForm() {
   const [textGroup, setTextGroup] = useState("");
   const [pending, setPending] = useState(false);
+  const [review, setReview] = useState<Record<string, FormDataEntryValue> | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const busy = useRef(false);
+  const reviewHeading = useRef<HTMLHeadingElement>(null);
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -21,6 +25,7 @@ export default function SignupForm() {
   }
   useEffect(() => {
     id.current = crypto.randomUUID();
+    try { id.current = sessionStorage.getItem("hoa-signup-request") || id.current; sessionStorage.setItem("hoa-signup-request", id.current); } catch { /* The in-memory key still protects retries when storage is unavailable. */ }
     fetch("/api/form-token", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
@@ -30,12 +35,13 @@ export default function SignupForm() {
         setMessage("The form could not initialize. Please refresh the page."),
       );
   }, []);
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function submit() {
+    if (busy.current || !review) return;
+    busy.current = true;
     setPending(true);
     setMessage("");
     setErrors({});
-    const form = new FormData(e.currentTarget);
+    const form = new FormData(formRef.current!);
     try {
       const r = await fetch("/api/resident-signup", {
         method: "POST",
@@ -50,6 +56,7 @@ export default function SignupForm() {
       const data = await r.json();
       if (r.ok && data.saved === true) {
         setSaved(true);
+        try { sessionStorage.removeItem("hoa-signup-request"); } catch {}
       } else {
         setErrors(data.fields ?? {});
         setMessage(
@@ -62,6 +69,7 @@ export default function SignupForm() {
         "Connection interrupted. Your entries are still here. Please try again.",
       );
     } finally {
+      busy.current = false;
       setPending(false);
       setTimeout(() => status.current?.focus(), 0);
     }
@@ -69,7 +77,7 @@ export default function SignupForm() {
   if (saved)
     return (
       <div className="success" ref={status} tabIndex={-1} role="status">
-        <p className="eyebrow">SUBMISSION SAVED</p>
+        <p className="eyebrow">STEP 3 OF 3 · CONFIRMATION</p>
         <h2>Thank you, neighbor.</h2>
         <p>
           Your contact information and preferences have been saved for
@@ -122,7 +130,13 @@ export default function SignupForm() {
     </div>
   );
   return (
-    <form className="signup-form" onSubmit={submit}>
+    <div>
+    <ol className="signup-steps" aria-label="Registration steps"><li aria-current={!review ? "step" : undefined}>1. Enter Information</li><li aria-current={review ? "step" : undefined}>2. Review Information</li><li>3. Confirmation</li></ol>
+    <form ref={formRef} className="signup-form" hidden={Boolean(review)} onSubmit={(e) => {
+      e.preventDefault(); setMessage("");
+      setReview(Object.fromEntries(new FormData(e.currentTarget)));
+      setTimeout(() => reviewHeading.current?.focus(), 0);
+    }}>
       <div ref={status} tabIndex={-1} role="alert">
         {message ? <p className="notice error">{message}</p> : null}
       </div>
@@ -201,9 +215,20 @@ export default function SignupForm() {
         formal HOA membership.
       </p>
       <button className="button" type="submit" disabled={pending}>
-        {pending ? "Saving your information…" : "Submit for review"}{" "}
+        Review Information{" "}
         <span aria-hidden="true">↗</span>
       </button>
     </form>
+    {review && <section className="signup-review" aria-labelledby="review-heading">
+      <h2 id="review-heading" ref={reviewHeading} tabIndex={-1}>Review Information</h2>
+      <p>Check your details before submitting. Nothing has been submitted yet.</p>
+      <dl>{[["requestType", "Request"], ["name", "Name"], ["spouseName", "Spouse Name (if applicable)"], ["address", "Address"], ["mobile", "Mobile"], ["email", "Email"], ["textGroup", "WP Text Messages Group"], ["facebookGroup", "WP Facebook Group"]].map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{key === "requestType" ? (review[key] === "new" ? "New registration" : "Contact update request") : (String(review[key] || "Not provided"))}</dd></div>)}</dl>
+      <p>You acknowledged that your information is for HOA administration and community communication and will not be displayed publicly.</p>
+      <p>Submission records contact information and preferences. It does not confirm dues payment or automatically establish HOA membership. Facebook membership requires a separate request and approval through Facebook.</p>
+      <div ref={status} role="alert" tabIndex={-1}>{message && <p className="notice error">{message}</p>}{Object.keys(errors).length > 0 && <p>Choose Edit Information to correct the highlighted fields.</p>}</div>
+      <div className="review-actions"><button className="button secondary" type="button" disabled={pending} onClick={() => {setReview(null); setTimeout(() => formRef.current?.querySelector<HTMLInputElement>("input")?.focus(), 0);}}>Edit Information</button>
+      <button className="button" type="button" disabled={pending} onClick={submit}>{pending ? "Saving your information…" : review.requestType === "update" ? "Submit Update Request" : "Submit Registration"}</button></div>
+    </section>}
+    </div>
   );
 }

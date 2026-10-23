@@ -70,6 +70,8 @@ export interface Config {
     spotlights: Spotlight;
     feedback: Feedback;
     users: User;
+    roles: Role;
+    reconciliations: Reconciliation;
     pages: Page;
     news: News;
     dues: Due;
@@ -89,6 +91,8 @@ export interface Config {
     spotlights: SpotlightsSelect<false> | SpotlightsSelect<true>;
     feedback: FeedbackSelect<false> | FeedbackSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    roles: RolesSelect<false> | RolesSelect<true>;
+    reconciliations: ReconciliationsSelect<false> | ReconciliationsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     news: NewsSelect<false> | NewsSelect<true>;
     dues: DuesSelect<false> | DuesSelect<true>;
@@ -339,7 +343,12 @@ export interface Feedback {
  */
 export interface User {
   id: number;
-  role: 'administrator' | 'board' | 'editor';
+  role?: ('administrator' | 'board' | 'editor') | null;
+  /**
+   * Choose all teams this person belongs to. Access combines across roles.
+   */
+  roles?: (number | Role)[] | null;
+  rolesMigrated?: boolean | null;
   active?: boolean | null;
   name?: string | null;
   updatedAt: string;
@@ -361,6 +370,99 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * Assign one or more roles to each user. Permissions combine. Administrator always has full access.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "roles".
+ */
+export interface Role {
+  id: number;
+  name: string;
+  key?: string | null;
+  /**
+   * Select only the permissions this team needs. Only Administrators can change these settings.
+   */
+  permissions?:
+    | (
+        | 'content.manage'
+        | 'leadership.manage'
+        | 'spotlight.manage'
+        | 'feedback.manage'
+        | 'residents.read'
+        | 'residents.edit'
+        | 'residents.approve'
+        | 'residents.export'
+        | 'residents.reconcile'
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reconciliations".
+ */
+export interface Reconciliation {
+  id: number;
+  decision: 'separate' | 'merged' | 'recovered';
+  source: number | Resident;
+  target: number | Resident;
+  actor: string;
+  reason: string;
+  snapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  resultVersions?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  recoveredAt?: string | null;
+  recoveredBy?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "residents".
+ */
+export interface Resident {
+  id: number;
+  name: string;
+  spouseName?: string | null;
+  address: string;
+  mobile?: string | null;
+  email: string;
+  textGroup: 'yes' | 'no';
+  facebookGroup: 'yes' | 'no';
+  /**
+   * Original website submission date. Blank for manually added records without a linked signup.
+   */
+  signedUpAt?: string | null;
+  status: 'active' | 'archived';
+  notes?: string | null;
+  preferenceHistory?:
+    | {
+        textGroup: 'yes' | 'no';
+        facebookGroup: 'yes' | 'no';
+        changedAt: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -422,36 +524,6 @@ export interface Due {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "residents".
- */
-export interface Resident {
-  id: number;
-  name: string;
-  spouseName?: string | null;
-  address: string;
-  mobile?: string | null;
-  email: string;
-  textGroup: 'yes' | 'no';
-  facebookGroup: 'yes' | 'no';
-  /**
-   * Original website submission date. Blank for manually added records without a linked signup.
-   */
-  signedUpAt?: string | null;
-  status: 'active' | 'archived';
-  notes?: string | null;
-  preferenceHistory?:
-    | {
-        textGroup: 'yes' | 'no';
-        facebookGroup: 'yes' | 'no';
-        changedAt: string;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "submissions".
  */
 export interface Submission {
@@ -466,6 +538,8 @@ export interface Submission {
   requestType: 'new' | 'update';
   status?: ('pending' | 'reviewed' | 'archived') | null;
   notes?: string | null;
+  reviewedAt?: string | null;
+  reviewedBy?: string | null;
   resident?: (number | null) | Resident;
   idempotencyKey: string;
   privacyAcceptedAt: string;
@@ -494,6 +568,15 @@ export interface RateLimit {
  */
 export interface Audit {
   id: number;
+  details?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   actor: string;
   action: string;
   entity: string;
@@ -546,6 +629,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'roles';
+        value: number | Role;
+      } | null)
+    | ({
+        relationTo: 'reconciliations';
+        value: number | Reconciliation;
       } | null)
     | ({
         relationTo: 'pages';
@@ -681,6 +772,8 @@ export interface FeedbackSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   role?: T;
+  roles?: T;
+  rolesMigrated?: T;
   active?: T;
   name?: T;
   updatedAt?: T;
@@ -700,6 +793,34 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "roles_select".
+ */
+export interface RolesSelect<T extends boolean = true> {
+  name?: T;
+  key?: T;
+  permissions?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reconciliations_select".
+ */
+export interface ReconciliationsSelect<T extends boolean = true> {
+  decision?: T;
+  source?: T;
+  target?: T;
+  actor?: T;
+  reason?: T;
+  snapshot?: T;
+  resultVersions?: T;
+  recoveredAt?: T;
+  recoveredBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -839,6 +960,8 @@ export interface SubmissionsSelect<T extends boolean = true> {
   requestType?: T;
   status?: T;
   notes?: T;
+  reviewedAt?: T;
+  reviewedBy?: T;
   resident?: T;
   idempotencyKey?: T;
   privacyAcceptedAt?: T;
@@ -863,6 +986,7 @@ export interface RateLimitsSelect<T extends boolean = true> {
  * via the `definition` "audit_select".
  */
 export interface AuditSelect<T extends boolean = true> {
+  details?: T;
   actor?: T;
   action?: T;
   entity?: T;

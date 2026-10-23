@@ -1,6 +1,7 @@
+import { approveResident } from "@/lib/resident-review";
 import { getPayload, createLocalReq } from "payload";
 import config from "@payload-config";
-import { role } from "@/lib/access";
+import { role, can } from "@/lib/access";
 import { sameOrigin } from "@/lib/security";
 import { csvCell } from "@/lib/validation";
 import { notifySubmission } from "@/lib/submission";
@@ -11,23 +12,21 @@ export async function POST(request: Request) {
   const auth = await payload.auth({ headers: request.headers });
   const req = await createLocalReq({ user: auth.user ?? undefined }, payload);
   const userRole = await role(req);
-  if (userRole !== "administrator" && userRole !== "board")
-    return Response.json(
-      { error: "Administrator access required." },
-      { status: 403 },
-    );
   let data;
   try {
     data = await request.json();
   } catch {
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }
-  if (userRole === "board" && !["duplicates", "review", "export", "export-xlsx"].includes(data.action))
-    return Response.json({ error: "Administrator access required for this action." }, { status: 403 });
+  const allowed = data.action === "export" || data.action === "export-xlsx" ? await can(req, "residents.export")
+    : data.action === "review" || data.action === "duplicates" ? await can(req, "residents.approve")
+    : userRole === "administrator";
+  if (!allowed) return Response.json({ error: "Your account does not have access to this action." }, { status: 403 });
   try {
     if (data.action === "export" || data.action === "export-xlsx") {
       const rows = await payload.find({
         collection: "residents",
+        where: { status: { equals: "active" } },
         limit: 0,
         pagination: false,
         overrideAccess: false,
@@ -116,72 +115,7 @@ export async function POST(request: Request) {
       });
     }
     if (data.action === "review") {
-      if (!data.confirm)
-        return Response.json(
-          { error: "Review and confirm the selected resident first." },
-          { status: 400 },
-        );
-      const transaction = await payload.db.beginTransaction();
-      if (!transaction) throw new Error("Transactions unavailable");
-      req.transactionID = transaction;
-      try {
-        await payload.create({
-          collection: "review-claims",
-          overrideAccess: true,
-          req,
-          data: { submissionID: String(data.id) },
-        });
-        const s = await payload.findByID({
-          collection: "submissions",
-          id: data.id,
-          overrideAccess: false,
-          req,
-        });
-        if (s.status !== "pending")
-          throw new Error("This request has already been reviewed.");
-        if (s.requestType === "update" && !data.residentID)
-          throw new Error(
-            "Select the existing resident for an update request.",
-          );
-        const fields = {
-          name: s.name,
-          spouseName: s.spouseName,
-          address: s.address,
-          mobile: s.mobile,
-          email: s.email,
-          textGroup: s.textGroup,
-          facebookGroup: s.facebookGroup,
-          status: "active" as const,
-        };
-        const resident = data.residentID
-          ? await payload.update({
-              collection: "residents",
-              id: data.residentID,
-              overrideAccess: false,
-              req,
-              data: fields,
-            })
-          : await payload.create({
-              collection: "residents",
-              overrideAccess: false,
-              req,
-              data: { ...fields, signedUpAt: s.createdAt },
-            });
-        await payload.update({
-          collection: "submissions",
-          id: s.id,
-          overrideAccess: true,
-          req,
-          data: { status: "reviewed", resident: resident.id },
-        });
-        await payload.db.commitTransaction(transaction);
-        return Response.json({
-          message: "Request reviewed and resident record saved.",
-        });
-      } catch (error) {
-        await payload.db.rollbackTransaction(transaction);
-        throw error;
-      }
+      return Response.json(await approveResident(payload, req, data));
     }
     if (data.action === "retry-notifications") {
       const pending = await payload.find({
@@ -196,78 +130,7 @@ export async function POST(request: Request) {
         message: `Retried ${pending.docs.length} notifications. Check their notification status in Submissions.`,
       });
     }
-    if (data.action === "merge") {
-      if (
-        !data.confirm ||
-        !data.sourceID ||
-        !data.targetID ||
-        String(data.sourceID) === String(data.targetID)
-      )
-        throw new Error(
-          "Choose two different resident records and confirm your review.",
-        );
-      const transaction = await payload.db.beginTransaction();
-      if (!transaction) throw new Error("Transactions unavailable");
-      req.transactionID = transaction;
-      try {
-        const source = await payload.findByID({
-          collection: "residents",
-          id: data.sourceID,
-          overrideAccess: false,
-          req,
-        });
-        const target = await payload.findByID({
-          collection: "residents",
-          id: data.targetID,
-          overrideAccess: false,
-          req,
-        });
-        if (source.status !== "active" || target.status !== "active")
-          throw new Error("Both records must be active before merging.");
-        await payload.update({
-          collection: "residents",
-          id: source.id,
-          overrideAccess: false,
-          req,
-          data: {
-            status: "archived",
-            notes:
-              (source.notes ?? "") +
-              "\nMerged into resident " +
-              target.id +
-              ". Existing contact details retained in this archive.",
-          },
-        });
-        await payload.update({
-          collection: "residents",
-          id: target.id,
-          overrideAccess: false,
-          req,
-          data: {
-            notes:
-              (target.notes ?? "") +
-              "\nMerged resident " +
-              source.id +
-              ". Survivor contact details and preferences retained after administrator review.",
-          },
-        });
-        await payload.update({
-          collection: "submissions",
-          overrideAccess: true,
-          req,
-          where: { resident: { equals: source.id } },
-          data: { resident: target.id },
-        });
-        await payload.db.commitTransaction(transaction);
-        return Response.json({
-          message:
-            "Records merged. Survivor details retained; duplicate archived; reviewed submissions reassigned.",
-        });
-      } catch (error) {
-        await payload.db.rollbackTransaction(transaction);
-        throw error;
-      }
-    }
+    if (data.action === "merge") return Response.json({ error: "Use Review Possible Duplicates to compare and merge records." }, { status: 400 });
     if (data.action === "invite") {
       if (!process.env.SMTP_HOST)
         throw new Error(
@@ -284,6 +147,8 @@ export async function POST(request: Request) {
       if (!invited) {
         if (!["administrator", "editor", "board"].includes(data.role))
           throw new Error("Choose an administrator, board member, or editor role.");
+        const assigned = await payload.find({ collection: "roles", overrideAccess: true, req, where: { key: { equals: data.role } }, limit: 1 });
+        if (!assigned.docs.length) throw new Error("Choose an existing role in Access → Users.");
         invited = await payload.create({
           collection: "users",
           overrideAccess: false,
@@ -292,6 +157,8 @@ export async function POST(request: Request) {
             email: String(data.email).trim().toLowerCase(),
             password: crypto.randomUUID() + crypto.randomUUID(),
             role: data.role,
+            roles: [assigned.docs[0].id],
+            rolesMigrated: true,
             active: true,
           },
         });

@@ -1,3 +1,4 @@
+import { guardAccount, releaseAccount } from "../lib/user-security";
 import { isSilentMP4 } from "../lib/silent-mp4";
 import { randomUUID } from "node:crypto";
 import { ValidationError } from "payload";
@@ -14,6 +15,8 @@ import {
   publicMedia,
   nobody,
   role,
+  permit,
+  can,
 } from "../lib/access";
 const text = (name: string, required = false): Field => ({
   name,
@@ -25,6 +28,7 @@ const audit: CollectionAfterChangeHook = async ({
   doc,
   collection,
   operation,
+  previousDoc,
 }) => {
   if (req.context.skipAudit) return doc;
   await req.payload.create({
@@ -36,6 +40,7 @@ const audit: CollectionAfterChangeHook = async ({
       action: operation,
       entity: collection.slug,
       recordID: String(doc.id),
+      ...(collection.slug === "users" ? { details: { beforeRoles: previousDoc?.roles ?? [], afterRoles: doc.roles ?? [], active: doc.active } } : {}),
     },
   });
   return doc;
@@ -148,11 +153,15 @@ export const Users: CollectionConfig = {
     {
       name: "role",
       type: "select",
-      required: true,
+      required: false,
+      admin: { hidden: true },
+      access: { update: () => false },
       defaultValue: "editor",
       options: [{ label: "Administrator", value: "administrator" }, { label: "Board Member", value: "board" }, { label: "Content Editor", value: "editor" }],
       saveToJWT: true,
     },
+    { name: "roles", label: "Assigned roles", type: "relationship", relationTo: "roles", hasMany: true, admin: { description: "Choose all teams this person belongs to. Access combines across roles." }, access: { create: async ({req}) => Boolean(await admin({req})), update: async ({req}) => Boolean(await admin({req})) } },
+    { name: "rolesMigrated", type: "checkbox", defaultValue: true, admin: { hidden: true }, access: { create: () => false, update: () => false } },
     { name: "active", type: "checkbox", defaultValue: true, saveToJWT: true },
     text("name"),
   ],
@@ -170,24 +179,7 @@ export const Users: CollectionConfig = {
       async ({ data, originalDoc, req, operation }) => {
         if (operation === "create" && !data.password)
           data.password = randomUUID() + randomUUID();
-        if (
-          originalDoc?.role === "administrator" &&
-          originalDoc.active &&
-          ((data.role && data.role !== "administrator") || data.active === false)
-        ) {
-          const count = await req.payload.count({
-            collection: "users",
-            where: {
-              and: [
-                { role: { equals: "administrator" } },
-                { active: { equals: true } },
-              ],
-            },
-            req,
-          });
-          if (count.totalDocs <= 1)
-            throw new Error("Invite and activate another administrator first.");
-        }
+        await guardAccount(req, originalDoc, { ...originalDoc, ...data });
         return data;
       },
     ],
@@ -199,23 +191,11 @@ export const Users: CollectionConfig = {
           req,
           overrideAccess: true,
         });
-        if (user.role === "administrator" && user.active) {
-          const count = await req.payload.count({
-            collection: "users",
-            where: {
-              and: [
-                { role: { equals: "administrator" } },
-                { active: { equals: true } },
-              ],
-            },
-            req,
-          });
-          if (count.totalDocs <= 1)
-            throw new Error("Keep at least one active administrator.");
-        }
+        await guardAccount(req, user, undefined);
       },
     ],
-    afterChange: [audit],
+    afterChange: [audit, async ({req, doc}) => { await releaseAccount(req); return doc; }],
+    afterDelete: [async ({req, doc}) => { await releaseAccount(req); return doc; }],
   },
 };
 export const Pages: CollectionConfig = {
@@ -298,7 +278,8 @@ export const News: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      ({ data, originalDoc }) => {
+      ({ data, originalDoc, req }) => {
+        if (req.context.restorePreferenceHistory) return data;
         if (data && !data.slug) data.slug = originalDoc?.slug || String(data.title ?? "")
           .toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
           .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -383,7 +364,7 @@ export const Media: CollectionConfig = {
     description:
       "Uploads are private until explicitly marked public. Publish only approved public documents and photos.",
   },
-  access: { create: staff, read: publicMedia, update: staff, delete: admin },
+  access: { create: async ({req}) => await can(req, "content.manage") || await can(req, "spotlight.manage"), read: publicMedia, update: async ({req}) => await can(req, "content.manage") || await can(req, "spotlight.manage"), delete: admin },
   upload: {
     staticDir: "media",
     mimeTypes: ["image/jpeg", "image/png", "image/webp", "application/pdf", "video/mp4"],
@@ -466,9 +447,9 @@ export const Residents: CollectionConfig = {
     components: { beforeList: ["@/components/AdminTools#ResidentTools"] },
   },
   access: {
-    create: residentManager,
+    create: permit("residents.edit"),
     read: residentManager,
-    update: residentManager,
+    update: permit("residents.edit"),
     delete: admin,
     readVersions: residentManager,
   },
@@ -496,7 +477,8 @@ export const Residents: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      ({ data, originalDoc }) => {
+      ({ data, originalDoc, req }) => {
+        if (req.context.restorePreferenceHistory) return data;
         if (
           !originalDoc ||
           (data.textGroup !== undefined &&
@@ -520,14 +502,15 @@ export const Residents: CollectionConfig = {
 };
 export const Submissions: CollectionConfig = {
   slug: "submissions",
+  labels: { singular: "Resident Submission", plural: "Resident Submissions" },
   admin: {
     useAsTitle: "name",
     group: "Private records",
     defaultColumns: ["name", "requestType", "status", "createdAt"],
     listSearchableFields: ["name", "address", "email"],
-    components: { beforeList: ["@/components/AdminTools#ReviewTools"] },
+    components: { views: { list: { Component: "@/components/SubmissionWorkspace#default" } } },
   },
-  access: { create: nobody, read: residentManager, update: residentManager, delete: admin },
+  access: { create: nobody, read: residentManager, update: permit("residents.approve"), delete: admin },
   fields: [
     {
       name: "reviewSubmission",
@@ -552,6 +535,8 @@ export const Submissions: CollectionConfig = {
       access: { update: () => false },
     },
     { name: "notes", type: "textarea" },
+    { name: "reviewedAt", type: "date", admin: { readOnly: true }, access: { update: () => false } },
+    { name: "reviewedBy", type: "text", admin: { readOnly: true }, access: { update: () => false } },
     {
       name: "resident",
       type: "relationship",
@@ -620,6 +605,7 @@ export const Audit: CollectionConfig = {
   },
   access: { create: nobody, read: admin, update: nobody, delete: nobody },
   fields: [
+    { name: "details", type: "json", admin: { readOnly: true } },
     text("actor", true),
     text("action", true),
     text("entity", true),

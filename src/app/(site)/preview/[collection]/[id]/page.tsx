@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { createLocalReq } from "payload";
 import { cms } from "@/lib/content";
-import { role } from "@/lib/access";
+import { can } from "@/lib/access";
 import { Prose } from "@/components/Content";
 import { NewsArticle } from "@/components/NewsArticle";
 import { Spotlight } from "@/components/Spotlight";
@@ -22,8 +22,7 @@ export default async function Preview({
   const p = await cms();
   const { user } = await p.auth({ headers: await headers() });
   const req = await createLocalReq({ user: user ?? undefined }, p);
-  const accessRole = await role(req);
-  if (!accessRole || (collection === "spotlights" && !["administrator", "board"].includes(accessRole))) notFound();
+  if (!await can(req, collection === "spotlights" ? "spotlight.manage" : "content.manage")) notFound();
   const doc = await p.findByID({
     collection,
     id,

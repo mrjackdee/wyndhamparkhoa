@@ -1,7 +1,10 @@
+import { initialRoles } from "../src/lib/permissions";
 import { getPayload } from "payload";
 import config from "../src/payload.config";
 import { CONTACTS, PURPOSE } from "../src/lib/facts";
 const p = await getPayload({ config });
+for (const role of initialRoles) if (!(await p.count({collection:"roles", where:{key:{equals:role.key}}})).totalDocs) await p.create({collection:"roles",data:role});
+const adminRole = (await p.find({collection:"roles",where:{key:{equals:"administrator"}},limit:1})).docs[0];
 if (!(await p.count({ collection: "dues" })).totalDocs)
   await p.create({
     collection: "dues",
@@ -48,6 +51,8 @@ if (
       email: process.env.BOOTSTRAP_ADMIN_EMAIL,
       password: process.env.BOOTSTRAP_ADMIN_PASSWORD,
       role: "administrator",
+      roles: [adminRole.id],
+      rolesMigrated: true,
       active: true,
       name: "Site administrator",
     },

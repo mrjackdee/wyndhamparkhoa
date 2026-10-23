@@ -1,5 +1,5 @@
 import { ValidationError, type CollectionConfig, type Where } from "payload";
-import { admin, residentManager } from "../lib/access";
+import { admin, permit } from "../lib/access";
 
 export const Spotlights: CollectionConfig = {
   slug: "spotlights",
@@ -11,8 +11,8 @@ export const Spotlights: CollectionConfig = {
     preview: (doc) => `/preview/spotlights/${doc.id}`,
   },
   access: {
-    create: residentManager, update: residentManager, delete: admin, readVersions: residentManager,
-    read: async ({ req }) => await residentManager({ req }) ? true : ({ _status: { equals: "published" } } as Where),
+    create: permit("spotlight.manage"), update: permit("spotlight.manage"), delete: admin, readVersions: permit("spotlight.manage"),
+    read: async ({ req }) => await permit("spotlight.manage")({ req }) ? true : ({ _status: { equals: "published" } } as Where),
   },
   versions: { drafts: { autosave: false }, maxPerDoc: 30 },
   fields: [
@@ -32,7 +32,7 @@ export const Spotlights: CollectionConfig = {
       ] },
     { name: "photosApproved", label: "Selected photos are approved for public display", type: "checkbox", defaultValue: false,
       admin: { description: "Leave new uploads private. Publishing with this confirmation makes the selected photos public.", condition: (data) => Boolean(data.recognitions?.some((r: { photo?: unknown }) => r.photo)) } },
-    { name: "source", label: "Source of this recognition", type: "textarea", required: true, admin: { description: "Record who supplied the information and when. This field is for the board's reference.", }, access: { read: async ({ req }) => Boolean(await residentManager({ req })) } },
+    { name: "source", label: "Source of this recognition", type: "textarea", required: true, admin: { description: "Record who supplied the information and when. This field is for the board's reference.", }, access: { read: async ({ req }) => Boolean(await permit("spotlight.manage")({ req })) } },
     { name: "featured", label: "Feature on homepage", type: "checkbox", defaultValue: false, admin: { position: "sidebar", description: "Publish with this selected to make this the homepage Spotlight. Only the most recently published featured Spotlight is shown." } },
     { name: "archived", label: "Move to Spotlight archive", type: "checkbox", defaultValue: false, admin: { position: "sidebar", description: "Removes this Spotlight from homepage eligibility. Published recognition remains readable in the archive. To remove it from public view entirely, unpublish it." } },
     { name: "featuredAt", type: "date", admin: { hidden: true }, access: { update: () => false } },

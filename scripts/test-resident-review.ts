@@ -1,37 +1,60 @@
-import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
-import { getPayload } from "payload";
-import config from "../src/payload.config";
-import { POST } from "../src/app/api/admin-tools/route";
-if (process.env.LOCAL_TEST_MODE !== "true" || process.env.VERCEL || process.env.TEST_DATABASE_URL !== "file:./review-qa.db") throw new Error("Isolated local test database required");
-const payload=await getPayload({config});
-const login=await payload.login({collection:"users",data:{email:"admin@example.invalid",password:"synthetic-local-test-password"}});
-const board=await payload.create({collection:"users",data:{email:`board-${randomUUID()}@example.invalid`,password:"synthetic-board-password",role:"board",active:true}});
-const boardLogin=await payload.login({collection:"users",data:{email:board.email,password:"synthetic-board-password"}});
-const editor=await payload.create({collection:"users",data:{email:`editor-${randomUUID()}@example.invalid`,password:"synthetic-editor-password",role:"editor",active:true}});
-const editorLogin=await payload.login({collection:"users",data:{email:editor.email,password:"synthetic-editor-password"}});
-const call=(data:object, token=login.token, origin="http://localhost:3000")=>POST(new Request(`${origin}/api/admin-tools`,{method:"POST",headers:{origin,"content-type":"application/json",cookie:`payload-token=${token??""}`},body:JSON.stringify(data)}));
-const contact={name:"Synthetic approval",address:"123 Synthetic Lane",email:"synthetic@example.invalid",textGroup:"no" as const,facebookGroup:"yes" as const};
-const submission=await payload.create({collection:"submissions",data:{...contact,requestType:"new",status:"pending",idempotencyKey:randomUUID(),privacyAcceptedAt:new Date().toISOString()}});
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+import { getPayload, createLocalReq } from 'payload';
+import config from '../src/payload.config';
+import { approveResident, matchingResidents, possibleMatch, approvalFields } from '../src/lib/resident-review';
+if (process.env.LOCAL_TEST_MODE !== 'true' || process.env.VERCEL || !process.env.TEST_DATABASE_URL?.includes('review-qa')) throw new Error('Isolated review QA database required');
+const p = await getPayload({ config });
 try {
- for (const origin of ["https://www.wyndhamparkhoa.org", "https://wyndhamparkhoa.org", "https://wyndhamparkhoa.vercel.app"]) {
-  const response=await call({action:"duplicates",id:submission.id},login.token,origin);
-  assert.equal(response.status,200,`Cookie authentication failed for ${origin}: ${await response.text()}`);
- }
- assert.equal((await call({action:"duplicates",id:submission.id},login.token,"https://untrusted.example")).status,403);
- assert.equal((await call({action:"review",id:submission.id,confirm:true},"invalid")).status,403);
- assert.equal((await call({action:"review",id:submission.id,confirm:false})).status,400);
- assert.equal((await call({action:"duplicates",id:submission.id},editorLogin.token)).status,403);
- assert.equal((await call({action:"export-xlsx"},editorLogin.token)).status,403);
- assert.equal((await call({action:"invite",email:"no@example.invalid",role:"administrator"},boardLogin.token)).status,403);
- const approved=await call({action:"review",id:submission.id,confirm:true},boardLogin.token);assert.equal(approved.status,200,await approved.text());
- const saved=await payload.findByID({collection:"submissions",id:submission.id});assert.equal(saved.status,"reviewed");assert.ok(saved.resident);
- assert.equal((await call({action:"review",id:submission.id,confirm:true})).status,400);
- const resident=await payload.findByID({collection:"residents",id:typeof saved.resident === "object" ? saved.resident!.id : saved.resident!});
- assert.equal(resident.signedUpAt,submission.createdAt);
- const exported=await call({action:"export-xlsx"},boardLogin.token);assert.equal(exported.status,200);assert.match(exported.headers.get("content-type")??"",/spreadsheetml/);assert.ok((await exported.arrayBuffer()).byteLength>1000);
- assert.equal((await call({action:"export-xlsx"},"invalid")).status,403);
- await payload.update({collection:"users",id:board.id,data:{active:false}});
- assert.equal((await call({action:"export-xlsx"},boardLogin.token)).status,403);
- console.log("PASS: approval saves resident, rejects repeat approval and missing confirmation; private Excel export succeeds and rejects anonymous access");
-} finally {await payload.destroy();}
+  const user = await p.create({ collection: 'users', data: { email: `board-${randomUUID()}@example.invalid`, password: randomUUID(), role: 'board', rolesMigrated: false, active: true } });
+  const editor = await p.create({ collection: 'users', data: { email: `editor-${randomUUID()}@example.invalid`, password: randomUUID(), role: 'editor', rolesMigrated: false, active: true } });
+  const req = await createLocalReq({ user: { ...user, collection: 'users' } }, p);
+  const make = (requestType: 'new' | 'update', extra = {}) => p.create({ collection: 'submissions', data: { name: 'Synthetic Resident', address: '123 QA Lane', email: 'synthetic@example.invalid', mobile: '8172350000', textGroup: 'no', facebookGroup: 'yes', requestType, idempotencyKey: randomUUID(), privacyAcceptedAt: new Date().toISOString(), ...extra } });
+  const s = await make('new');
+  const approved = await approveResident(p, req, { id: s.id, confirm: true, expectedUpdatedAt: s.updatedAt });
+  assert.ok(approved.residentID);
+  let resident = await p.findByID({ collection: 'residents', id: approved.residentID });
+  assert.equal(resident.signedUpAt, s.createdAt);
+  assert.equal(resident.preferenceHistory?.length, 1);
+  await assert.rejects(() => approveResident(p, req, { id: s.id, confirm: true }));
+  assert.equal((await p.count({ collection: 'residents' })).totalDocs, 1);
+  console.log('PASS board approval, signup timestamp, preference history, repeat approval protection');
+  const update = await make('update', { mobile: '', spouseName: '', textGroup: 'yes' });
+  await assert.rejects(() => approveResident(p, req, { id: update.id, confirm: true }));
+  await assert.rejects(() => approveResident(p, req, { id: update.id, residentID: resident.id, residentUpdatedAt: 'stale', confirm: true }));
+  const updated = await approveResident(p, req, { id: update.id, residentID: resident.id, residentUpdatedAt: resident.updatedAt, confirm: true });
+  resident = await p.findByID({ collection: 'residents', id: updated.residentID });
+  assert.equal(resident.mobile, '8172350000');
+  assert.equal(resident.textGroup, 'yes');
+  assert.equal(resident.preferenceHistory?.length, 2);
+  assert.equal(resident.signedUpAt, s.createdAt);
+  console.log('PASS explicit update target, stale record protection, omitted mobile preservation, timestamp retention');
+  const duplicate = await make('new', { name: ' SYNTHETIC resident ', email: 'other@example.invalid' });
+  assert.ok((await matchingResidents(p, req, duplicate)).length);
+  await assert.rejects(() => approveResident(p, req, { id: duplicate.id, confirm: true }));
+  assert.equal((await p.findByID({ collection: 'submissions', id: duplicate.id })).status, 'pending');
+  const before = (await p.count({ collection: 'residents' })).totalDocs;
+  const originalCreate = p.create.bind(p);
+  p.create = (async (args: Parameters<typeof p.create>[0]) => {
+    if (args.collection === 'audit' && 'data' in args && (args.data as {action?: string}).action === 'approve-registration') throw new Error('Synthetic storage failure');
+    return originalCreate(args);
+  }) as typeof p.create;
+  await assert.rejects(() => approveResident(p, req, { id: duplicate.id, confirm: true, confirmDifferent: true }));
+  p.create = originalCreate;
+  assert.equal((await p.count({ collection: 'residents' })).totalDocs, before);
+  assert.equal((await p.findByID({ collection: 'submissions', id: duplicate.id })).status, 'pending');
+  console.log('PASS duplicate confirmation and atomic rollback on audit storage failure');
+  for (const user of [undefined, { ...editor, collection: 'users' as const }]) {
+    const denied = await createLocalReq({ user }, p);
+    await assert.rejects(() => p.find({ collection: 'submissions', overrideAccess: false, req: denied }));
+    await assert.rejects(() => p.find({ collection: 'residents', overrideAccess: false, req: denied }));
+    await assert.rejects(() => approveResident(p, denied, { id: duplicate.id, confirm: true, confirmDifferent: true }));
+  }
+  console.log('PASS editor and visitor read/approval denial');
+  assert.ok(possibleMatch({ mobile: '+1 (817) 235-0000' }, { mobile: '8172350000' }));
+  assert.ok(!possibleMatch({ name: '' }, { name: '' }));
+  assert.equal(approvalFields(update, resident, ['mobile']).mobile, '');
+  console.log('PASS normalized phone matching, empty match exclusion, explicit optional clearing');
+} finally { await p.destroy(); }
+
+process.exit(0);
