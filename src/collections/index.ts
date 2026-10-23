@@ -250,6 +250,8 @@ export const News: CollectionConfig = {
       if (field.type === "textarea" && field.name === "source") return { ...field, label: "Where did this news come from?", admin: { description: "For example: HOA meeting, October 17, 2026; caption supplied by DKPD." } };
       return field;
     }),
+    { name: "showPhotoGallery", label: "Show photo gallery on website", type: "checkbox", defaultValue: false,
+      admin: { description: "Turn on and Publish changes to display this story’s photos. Turn off and publish to hide them while keeping the files, text and video. Private Preview still shows attached photos. Previously shared image links remain accessible." } },
     {
       name: "photos", type: "array", label: "Photos and captions",
       labels: { singular: "Photo", plural: "Photos" }, maxRows: 20,

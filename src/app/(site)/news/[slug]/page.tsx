@@ -7,7 +7,7 @@ import { canonicalUrl, organization, pageMetadata } from "@/lib/seo";
 import type { News } from "@/payload-types";
 
 function publicImages(story: News) {
-  if (story.slug === "meeting") return [];
+  if (story.showPhotoGallery !== true) return [];
   return (story.photos ?? []).flatMap(({ photo }) => {
     if (typeof photo !== "object" || !photo?.url || photo.visibility !== "public" || !photo.mimeType?.startsWith("image/")) return [];
     const path = photo.url.replace(/^https:\/\/(?:wyndhamparkhoa\.vercel\.app|(?:www\.)?wyndhamparkhoa\.org)(?=\/api\/media\/)/, "");

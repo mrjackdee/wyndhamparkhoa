@@ -22,6 +22,12 @@ try {
     await query(`ALTER TABLE wphoa.${table} ADD COLUMN IF NOT EXISTS ${prefix}video_id integer REFERENCES wphoa.media(id) ON DELETE SET NULL,
       ADD COLUMN IF NOT EXISTS ${prefix}video_description varchar, ADD COLUMN IF NOT EXISTS ${prefix}video_approved boolean DEFAULT false`);
   }
+  // Initialize once; subsequent deployments preserve the board's saved choice.
+  for (const [table, prefix] of [['news', ''], ['_news_v', 'version_']]) {
+    await query(`ALTER TABLE wphoa.${table} ADD COLUMN IF NOT EXISTS ${prefix}show_photo_gallery boolean`);
+    await query(`UPDATE wphoa.${table} SET ${prefix}show_photo_gallery = (${prefix}slug <> 'meeting') WHERE ${prefix}show_photo_gallery IS NULL`);
+    await query(`ALTER TABLE wphoa.${table} ALTER COLUMN ${prefix}show_photo_gallery SET DEFAULT false`);
+  }
   await query('ALTER TABLE wphoa.media ADD COLUMN IF NOT EXISTS prefix varchar, ADD COLUMN IF NOT EXISTS _objectkey varchar');
   for (const [table, prefix] of [['news', ''], ['_news_v', 'version_']]) {
     await query(`ALTER TABLE wphoa.${table}

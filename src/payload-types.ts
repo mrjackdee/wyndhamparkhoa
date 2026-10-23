@@ -218,6 +218,10 @@ export interface News {
    */
   archived?: boolean | null;
   /**
+   * Turn on and Publish changes to display this story’s photos. Turn off and publish to hide them while keeping the files, text and video. Private Preview still shows attached photos. Previously shared image links remain accessible.
+   */
+  showPhotoGallery?: boolean | null;
+  /**
    * Add a photo, then enter its caption. Move a row to the top to use it as the cover. Keep new uploads private until this story is published.
    */
   photos?:
@@ -723,6 +727,7 @@ export interface NewsSelect<T extends boolean = true> {
   body?: T;
   source?: T;
   archived?: T;
+  showPhotoGallery?: T;
   photos?:
     | T
     | {

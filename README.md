@@ -365,3 +365,6 @@ Admin branding uses the existing Wyndham Park WP monogram with “Wyndham Park�
 Administration also uses the same self-hosted Inter font as the public site, rounded primary and secondary actions, and a structured dashboard guide with separate content, Spotlight, resident review, and user-access sections.
 
 Feedback spam filtering also rejects paired long, unbroken, heavily mixed-case name and subject values before uploads, database writes or notifications. This conservative heuristic supplements the honeypot, signed timing token and durable rate limit; it does not guarantee prevention of all spam. Existing records are retained for board review.
+
+### Recap photo visibility
+In Website → News and events, open the story and use **Show photo gallery on website**. Save draft keeps the choice private; Publish changes applies it to the public gallery, homepage photo fallback and social image metadata. Turning it off retains uploads, captions, text and video. Private Preview still shows attached photos. This is a display control, not revocation of previously shared image URLs. The October 17 recap starts with the switch off. Existing other stories retain their gallery display; new stories default off. Administrator and Board Member content permissions apply. Versions retain the setting for restoration.
