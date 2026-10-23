@@ -997,3 +997,16 @@ h1 em { font-weight: 600; }
 .news-article:has(+ .recap-recognition) { padding-bottom: 32px; }
 .news-article:has(+ .recap-recognition) .prose > p:last-child { margin-bottom: 0; }
 .recap-recognition { padding-top: 0; }
+
+/* Homepage community access and first-visit resident invitation. */
+.hero-facebook { margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--line, #d7d3c5); }
+.hero-facebook p { font-size: 12px; line-height: 1.6; color: var(--muted); max-width: 43ch; margin: 10px 0 0; }
+.resident-invitation { width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); overflow-y: auto; margin: auto; padding: 46px 36px 30px; color: var(--ink, #1d4035); background: var(--paper, #fffdf6); border: 1px solid #d7d3c5; border-top: 4px solid var(--brick, #914e35); border-radius: 8px; box-shadow: 0 20px 80px #102d2540; }
+.resident-invitation::backdrop { background: #102d2580; }
+.resident-invitation h2 { font-size: clamp(26px, 5vw, 34px); line-height: 1.2; margin: 12px 0 18px; }
+.resident-invitation > p { line-height: 1.65; }
+.resident-invitation .eyebrow { font-size: 10px; margin: 0; padding-right: 18px; }
+.invitation-close { position: absolute; top: 7px; right: 7px; width: 44px; height: 44px; border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 28px; border-radius: 50%; }
+.invitation-close:hover { background: #e6eadf; }
+.resident-invitation .invitation-note { font-size: 12px; color: var(--muted); margin: 22px 0 0; }
+@media (max-width: 480px) { .resident-invitation { padding: 46px 22px 26px; } .resident-invitation .actions { align-items: stretch; flex-direction: column; } }

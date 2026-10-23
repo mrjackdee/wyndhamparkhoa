@@ -368,3 +368,9 @@ Feedback spam filtering also rejects paired long, unbroken, heavily mixed-case n
 
 ### Recap photo visibility
 In Website → News and events, open the story and use **Show photo gallery on website**. Save draft keeps the choice private; Publish changes applies it to the public gallery, homepage photo fallback and social image metadata. Turning it off retains uploads, captions, text and video. Private Preview still shows attached photos. This is a display control, not revocation of previously shared image URLs. The October 17 recap starts with the switch off. Existing other stories retain their gallery display; new stories default off. Administrator and Board Member content permissions apply. Versions retain the setting for restoration.
+
+### Homepage engagement controls (October 23, 2026)
+- The hero links directly to the existing Wyndham Park Facebook group. The homepage dues tile is labeled HOA Annual Dues; the dues page retains dated notices.
+- Community recognition advances every seven seconds. Pause/Resume remains visible and reflects playback. Hover does not stop rotation. Keyboard focus pauses for accessibility; Resume explicitly restarts playback. Reduced-motion visitors start paused and can opt in with Resume. Hidden browser tabs do not advance slides.
+- `ResidentSignupPrompt` uses a native modal dialog on public pages after 1.2 seconds. Close, Not now, Escape, and the signup link dismiss it. Browser local storage key `wphoa-resident-invitation-seen` remembers the first display; an in-memory fallback works when storage is blocked. Clearing browser storage or using a new browser allows the invitation again. It stores no resident data and adds no analytics.
+- Signup, feedback, and policy routes suppress the invitation. Native dialog focus containment, focus restoration, scroll locking, and responsive sizing support keyboard and mobile use. The prompt only links to the existing signup workflow and does not submit information.

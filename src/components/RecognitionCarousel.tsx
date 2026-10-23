@@ -12,11 +12,9 @@ const subscribeMotion = (callback: () => void) => {
 export function RecognitionCarousel({ children }: { children: ReactNode }) {
   const cards = Children.toArray(children);
   const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
+  const [playback, setPlayback] = useState<"playing" | "paused" | null>(null);
   const reducedMotion = useSyncExternalStore(subscribeMotion, () => window.matchMedia(motionQuery).matches, () => true);
-  const rotating = !paused && !hovered && !focused && !reducedMotion;
+  const rotating = playback === "playing" || (playback === null && !reducedMotion);
   useEffect(() => {
     if (!rotating || cards.length < 2) return;
     const timer = window.setInterval(() => {
@@ -27,8 +25,10 @@ export function RecognitionCarousel({ children }: { children: ReactNode }) {
   const move = (step: number) => setActive(index => (index + step + cards.length) % cards.length);
   if (!cards.length) return null;
   return <div className="recognition-carousel" role="region" aria-roledescription="carousel" aria-label="Community recognition"
-    onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-    onFocus={() => setFocused(true)} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); }}
+    onFocus={event => {
+      // Pause for keyboard users, without trapping the Resume button in a paused state.
+      if (!event.currentTarget.contains(event.relatedTarget) && event.target.matches(":focus-visible")) setPlayback("paused");
+    }}
     onKeyDown={event => {
       if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
         event.preventDefault(); move(event.key === "ArrowRight" ? 1 : -1);
@@ -38,7 +38,7 @@ export function RecognitionCarousel({ children }: { children: ReactNode }) {
       {cards.map((card, index) => <div key={index} hidden={active !== index} role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${cards.length}`}>{card}</div>)}
     </div>
     {cards.length > 1 ? <div className="recognition-controls">
-      {!reducedMotion ? <button type="button" className="button secondary" onClick={() => setPaused(value => !value)} aria-label={paused ? "Resume automatic recognition slideshow" : "Pause automatic recognition slideshow"}>{paused ? "Resume" : "Pause"}</button> : null}
+      <button type="button" className="button secondary" onClick={() => setPlayback(rotating ? "paused" : "playing")} aria-label={rotating ? "Pause automatic recognition slideshow" : "Resume automatic recognition slideshow"}>{rotating ? "Pause" : "Resume"}</button>
       <button type="button" className="button secondary" onClick={() => move(-1)} aria-label="Previous recognition">←</button>
       <span className="recognition-counter">{active + 1} / {cards.length}</span>
       <button type="button" className="button secondary" onClick={() => move(1)} aria-label="Next recognition">→</button>

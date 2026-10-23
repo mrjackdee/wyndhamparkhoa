@@ -1,3 +1,4 @@
+import { ResidentSignupPrompt } from "@/components/ResidentSignupPrompt";
 import { SITE_URL } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -70,6 +71,7 @@ export default async function Layout({
           <Nav extra={extras} />
         </header>
         <main id="main">{children}</main>
+        <ResidentSignupPrompt />
         <footer>
           <div className="footer-main">
             <div>
