@@ -70,6 +70,7 @@ try {
     notification_last_attempt timestamptz, updated_at timestamptz NOT NULL DEFAULT now(), created_at timestamptz NOT NULL DEFAULT now())`);
   await query('ALTER TABLE wphoa.payload_locked_documents_rels ADD COLUMN IF NOT EXISTS feedback_id integer REFERENCES wphoa.feedback(id) ON DELETE CASCADE');
   await query(await readFile(new URL('./spotlights-schema.sql', import.meta.url), 'utf8'));
+  console.log('Starting protected Membership migration.');
   await migrateMembership(client, schema);
   const check = await query("SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema='wphoa'");
   if (check.rows[0].count < 20) throw new Error('Schema verification failed.');
@@ -77,6 +78,6 @@ try {
   console.log('Private HOA database schema initialized and verified.');
 } catch (error) {
   await query('ROLLBACK').catch(() => {});
-  console.error('Database initialization failed:', error.code || error.name);
+  console.error('Database initialization failed:', error.code || error.constructor.name);
   process.exitCode = 1;
 } finally { await client.end(); }

@@ -14,9 +14,10 @@ export async function migrateMembership(client, schema) {
   const bytes = Buffer.from(JSON.stringify(backup));
   const checksum = createHash('sha256').update(bytes).digest('hex');
   const pathname = `${schema === 'wphoa' ? 'backups' : 'qa/'+schema}/before-membership-${Date.now()}.json`;
-  await put(pathname,bytes,{access:'private',addRandomSuffix:false,contentType:'application/json'});
-  const stored = await get(pathname,{access:'private'});
-  if (!stored || stored.statusCode !== 200 || createHash('sha256').update(Buffer.from(await new Response(stored.stream).arrayBuffer())).digest('hex') !== checksum) throw new Error('Backup readback failed');
+  try { await put(pathname,bytes,{access:'private',addRandomSuffix:false,contentType:'application/json'}); } catch(e) { throw Object.assign(new Error('Private backup write failed'), {code:'BACKUP_WRITE_'+e.constructor.name}); }
+  let stored;
+  try { stored = await get(pathname,{access:'private'}); } catch(e) { throw Object.assign(new Error('Private backup read failed'), {code:'BACKUP_READ_'+e.constructor.name}); }
+  if (!stored || stored.statusCode !== 200 || createHash('sha256').update(Buffer.from(await new Response(stored.stream).arrayBuffer())).digest('hex') !== checksum) throw Object.assign(new Error('Backup readback failed'),{code:'BACKUP_CHECKSUM'});
   // No password, hashes, email addresses or resident data are written to logs.
   console.log('Pre-migration private backup verified:', pathname, 'SHA256:', checksum);
   await q(`CREATE TYPE wphoa.enum_roles_permissions AS ENUM ('content.manage','leadership.manage','spotlight.manage','feedback.manage','residents.read','residents.edit','residents.approve','residents.export','residents.reconcile');
