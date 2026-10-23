@@ -11,7 +11,7 @@ export function NewsArticle({ story, preview = false }: { story: News; preview?:
       {new Intl.DateTimeFormat("en-US", { dateStyle: "full", ...(story.slug === "meeting" ? {} : { timeStyle: "short" as const }),
         timeZone: story.timezone ?? "America/New_York" }).format(new Date(story.eventDate))}
     </time>{story.slug !== "meeting" ? <> ({story.timezone ?? "America/New_York"})<br />{story.location}</> : null}</p> : null}
-    <NewsGallery photos={story.photos} preview={preview} />
+    {(preview || story.slug !== "meeting") && <NewsGallery photos={story.photos} preview={preview} />}
     <Prose text={story.body} />
   </article>;
 }

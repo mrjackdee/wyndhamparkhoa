@@ -80,7 +80,7 @@ export default async function Home() {
                 <a href={featuredVideo.url}>Watch the video</a>
               </video>
               <figcaption>Click play to watch.</figcaption>
-            </figure> : <NewsGallery photos={featured.photos} coverOnly />}
+            </figure> : featured.slug !== "meeting" ? <NewsGallery photos={featured.photos} coverOnly /> : null}
             <div>
               <p className="eyebrow">COMMUNITY NEWS</p>
               <h3>{featured.title}</h3>
